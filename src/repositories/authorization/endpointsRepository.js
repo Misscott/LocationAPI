@@ -1,6 +1,6 @@
 import { pagination } from "../../utils/pagination.js";
 
-const _endpointsQuery = (_pagination) => ({ count }) => ({ uuid, route, method }) => {
+const _endpointsQuery = (_pagination = '') => ({ count }) => ({ uuid, route, method }) => {
     const uuidCondition = uuid ? "AND uuid = :uuid " : "";
     const routeCondition = route ? "AND route = :route " : "";
     const methodCondition = method ? "AND method = :method " : "";
@@ -46,12 +46,14 @@ const insertEndpointsQuery = () => {
 }
 
 const updateEndpointsQuery = () => {
-    const routeCondition = route ? 'route = :route ' : '';
+    const routeCondition = route ? 'route = :route,' : '';
     return `
     UPDATE mydb.endpoints
     SET
         ${routeCondition}
+        uuid = :uuid
     WHERE uuid = :uuid;
+    AND deleted IS NULL;
     SELECT * FROM mydb.endpoints WHERE uuid = :uuid;
     `
 }
@@ -61,6 +63,7 @@ const softDeleteEndpointsQuery = () => {
     UPDATE mydb.endpoints
     SET deleted = :now, deletedBy = :deletedBy
     WHERE uuid = :uuid;
+    AND deleted IS NULL;
     SELECT * FROM mydb.endpoints WHERE uuid = :uuid;
     `
 }

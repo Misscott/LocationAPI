@@ -1,6 +1,6 @@
 import { pagination } from '../../utils/pagination.js'
 
-const _permissionsQuery = (_pagination) => ({count}) => ({uuid, action, endpoint}) => {
+const _permissionsQuery = (_pagination = '') => ({count}) => ({uuid, action, endpoint}) => {
     const uuidCondition = uuid ? 'AND uuid = :uuid ' : '';
     const actionCondition = action ? 'AND action = :action ' : '';
     const endpointCondition = endpoint ? 'AND fk_endpoint = (SELECT id from mydb.endpoints WHERE route = :endpoint)' : '';
@@ -20,7 +20,6 @@ const _permissionsQuery = (_pagination) => ({count}) => ({uuid, action, endpoint
       AND
         true
         ${uuidCondition}
-        ${nameCondition}
         ${actionCondition}
         ${endpointCondition}
         ${_pagination}
@@ -55,17 +54,18 @@ const insertPermissionsQuery = () => {
 }
 
 const modifyPermissionsQuery = (action, endpoint) => {
-  const actionCondition = action ? 'action = :action ' : '';
-  const endpointCondition = endpoint ? 'fk_endpoint = (SELECT id from mydb.endpoints WHERE route = :endpoint)' : '';
+  const actionCondition = action ? 'action = :action ,' : '';
+  const endpointCondition = endpoint ? 'fk_endpoint = (SELECT id from mydb.endpoints WHERE route = :endpoint),' : '';
   return `
   UPDATE mydb.permissions
   SET 
       ${actionCondition}
       ${endpointCondition}
+      uuid = :uuid
   WHERE
       permissions.uuid = :uuid
   AND 
-      permissions.deleted IS NULL    
+      permissions.deleted IS NULL;
   SELECT * FROM mydb.permissions WHERE uuid = :uuid;
   `
 }
