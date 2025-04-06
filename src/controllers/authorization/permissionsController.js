@@ -29,7 +29,7 @@ const getPermissionController = (req, res, next, config) => {
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment)
-            res.status(error.code).json(error)
+            return res.status(error.code).json(error)
         })
         .finally(() => {
             mysql.end(conn)
@@ -57,7 +57,7 @@ const getPermissionByUuidController = (req, res, next, config) => {
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment)
-            return res.status(error.code).json(error)
+            res.status(error.code).json(error)
         })
         .finally(() => {
             mysql.end(conn)
@@ -66,7 +66,7 @@ const getPermissionByUuidController = (req, res, next, config) => {
 
 const postPermissionController = (req, res, next, config) => {
     const conn = mysql.start(config)
-    const created_by = req.headers['uuid_requester'] || null
+    const created_by = req.auth.user || null
 
     insertPermissionModel({...req.body, created_by, conn})
         .then((response) => {
@@ -101,7 +101,7 @@ const putPermissionController = (req, res, next, config) => {
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment)
-            res.status(error.code).json(error)
+            return res.status(error.code).json(error)
         })
         .finally(() => {
             mysql.end(conn)
@@ -111,17 +111,16 @@ const putPermissionController = (req, res, next, config) => {
 const softDeletePermissionController = (req, res, next, config) => {
     const conn = mysql.start(config)
     const uuid_permission = req.params.uuid
-    const deletedBy = req.headers['uuid_requester'] || null
-    const {deleted} = req.body
+    const deletedBy = req.auth.user || null
 
-    softDeletePermissionModel({uuid_permission, deleted, deletedBy, conn})
+    softDeletePermissionModel({uuid_permission, deletedBy, conn})
         .then(() => {
             const result = {}
             next(result)
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment)
-            res.status(error.code).json(error)
+            return res.status(error.code).json(error)
         })
         .finally(() => {
             mysql.end(conn)

@@ -1,3 +1,4 @@
+
 import bcrypt from 'bcrypt'
 import mysql from '../../adapters/mysql.js'
 import { 
@@ -65,7 +66,7 @@ const getUserInfoController = (req, res, next, config) => {
 		})
 		.catch((err) => {
 			const error = errorHandler(err, config.environment)
-			res.status(error.code).json(error)
+			return res.status(error.code).json(error)
 		})
 		.finally(() => {
 			mysql.end(conn)
@@ -74,13 +75,18 @@ const getUserInfoController = (req, res, next, config) => {
 
 const postUserController = (req, res, next, config) => {
 	const conn = mysql.start(config)
-	const createdby = req.headers['uuid-requester'] || null
-	const { username, password} = req.body
-
-    //encrypt password
+	const createdBy = req.auth.user || null
+	const {username, password, email, fk_role} = req.body
+	if (!username || !password) {
+		const err = error404()
+		return sendResponseNotFound(res, err)
+	}
+	//encrypt password
 	bcrypt
 		.hash(password, config.saltRounds)
-		.then(hash => insertUserModel({ username, password: hash, email, fk_role, createdby, conn }))
+		.then(hash => {
+			insertUserModel({ conn, username, password: hash, email, fk_role, createdBy })
+		})
 		.then((users) => {
 			const result = {
 				_data: {
@@ -92,7 +98,7 @@ const postUserController = (req, res, next, config) => {
 		})
 		.catch((err) => {
 			const error = errorHandler(err, config.environment)
-			res.status(error.code).json(error)
+			return res.status(error).json(error)
 		})
 		.finally(() => {
 			mysql.end(conn)
@@ -115,7 +121,7 @@ const putUserController = (req, res, next, config) => {
 		})
 		.catch((err) => {
 			const error = errorHandler(err, config.environment)
-			res.status(error.code).json(error)
+			return res.status(error.code).json(error)
 		})
 		.finally(() => {
 			mysql.end(conn)
@@ -125,17 +131,16 @@ const putUserController = (req, res, next, config) => {
 const softDeleteUserController = (req, res, next, config) => {
 	const conn = mysql.start(config)
 	const uuid = req.params.uuid
-	const { deleted } = req.body
-	const deletedby = req.headers['uuid-requester'] || null
+	const deletedby = req.auth.user || null
 
-	softDeleteUserModel({ uuid, deleted, deletedby, conn })
+	softDeleteUserModel({ uuid, deletedby, conn })
 		.then(() => {
 			const result = {}
 			next(result)
 		})
 		.catch((err) => {
 			const error = errorHandler(err, config.environment)
-			res.status(error.code).json(error)
+			return res.status(error.code).json(error)
 		})
 		.finally(() => {
 			mysql.end(conn)
