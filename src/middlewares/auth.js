@@ -1,10 +1,9 @@
-import { sendResponseAccessDenied } from '../utils/responses.js';
-import { checkPermission, getDataFromToken, generateAccessToken} from '../services/authService.js';
+import { sendResponseAccessDenied, sendResponseUnauthorized, sendResponseNotFound } from '../utils/responses.js';
+import { checkPermission, getDataFromToken, generateTokens} from '../services/authService.js';
 import { getRolesHasPermissionsModel } from '../models/authorization/roles_has_permissionsModel.js';
 import { error404, errorHandler } from '../utils/errors.js';
 import { noResults } from '../validators/result-validators.js';
 import mysql from '../adapters/mysql.js';
-import { sendResponseNotFound } from '../utils/responses.js';
 
 const obtainToken = (req, res) => {
     return new Promise((resolve, reject) => {
@@ -12,7 +11,7 @@ const obtainToken = (req, res) => {
         if (token) {
             resolve(token);
         } else {
-            return sendResponseAccessDenied(res, { message: 'No authorization provided. Access token required' })
+            return sendResponseUnauthorized(res, { message: 'No authorization provided. Access token required' })
         }
     });
 };
@@ -20,8 +19,8 @@ const obtainToken = (req, res) => {
 const setToken = (result, req, res, next, config) => {
 	const { uuid, role } = result._data
     const payload = {role, user: uuid}
-	const token = generateAccessToken(payload)
-	next({ user: { ...result, token } })
+	const {accessToken, refreshToken} = generateTokens(payload)
+	next({ user: { ...result, accessToken, refreshToken} })
 }
 
 const authenticateToken = (req, res, next) => {
@@ -32,7 +31,7 @@ const authenticateToken = (req, res, next) => {
             next();
         })
         .catch((error) => {
-            return sendResponseAccessDenied(res, error);
+            return sendResponseUnauthorized(res, error);
         });
 };
 
