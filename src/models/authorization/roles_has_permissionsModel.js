@@ -1,3 +1,4 @@
+
 import { randomUUID as uuidv4 } from 'node:crypto'
 import dayjs from 'dayjs'
 import mysql from '../../adapters/mysql.js'
@@ -5,7 +6,8 @@ import {
     getRolesHasPermissionsQuery,
     countRolesHasPermissionsQuery,
     insertRolesHasPermissionsQuery,
-    softDeleteRolesHasPermissionsQuery
+    softDeleteRolesHasPermissionsQuery,
+    modifyRolesHasPermissionsQuery
 } from '../../repositories/authorization/roles_has_permissionsRepository.js'
 
 const getRolesHasPermissionsModel = ({conn, ...rest}) => {
@@ -36,9 +38,22 @@ const insertRolesHasPermissionsModel = ({conn, ...rest}) => {
         .then(results => results[1].map(({id, uuid, fk_role, fk_permission, created, deleted, createdBy, deletedBy, ...rest}) => ({...rest})))
 }
 
+const modifyRolesHasPermissionsModel = ({conn, ...params}) => {
+    return mysql
+        .execute(modifyRolesHasPermissionsQuery(params), conn, params)
+        .then(queryResult => {
+            const deletedItem = queryResult[1].find(item => item.deleted !== null);
+  
+            if (deletedItem) {
+                throw error404()
+            }
+            return queryResult[1].map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered)
+        })
+}
+
 const softDeleteRolesHasPermissionsModel = ({conn, deleted, deletedBy, ...rest}) => {
     const deletedData = deleted ? dayjs.utc(deleted).format('YYYY-MM-DD HH:mm:ss') : dayjs.utc().format('YYYY-MM-DD HH:mm:ss')
-	const params = { ...rest, deleted: deletedData }
+	const params = { ...rest, deleted: deletedData, deletedBy }
 
 	return mysql
 		.execute(softDeleteRolesHasPermissionsQuery(params), conn, params)
@@ -48,5 +63,6 @@ export {
     getRolesHasPermissionsModel,
     countRolesHasPermissionsModel,
     insertRolesHasPermissionsModel,
-    softDeleteRolesHasPermissionsModel
+    softDeleteRolesHasPermissionsModel,
+    modifyRolesHasPermissionsModel
 }
