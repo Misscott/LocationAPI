@@ -11,6 +11,10 @@ const sendResponseNoContent = (result, req, res) => {
 	res.status(204).json(result)
 }
 
+const sendResponseConflict = (res, err) => {
+	res.status(409).json(err)
+}
+
 const sendResponseServerError = (res, err) => {
 	res.status(500).json(err)
 }
@@ -42,7 +46,6 @@ const sendUnprocessableEntityResponse = (res, environment, err = error422()) => 
 
 const sendLoginSuccessfullResponse = (result, req, res) => {
 	res.status(201).json(result)
-	console.warn(`User ${result.user._data.username} has logged in`)
 }
 
-export { sendLoginSuccessfullResponse, sendCreatedResponse, sendResponseAccessDenied, sendOkResponse, sendResponseBadRequest, sendResponseNoContent, sendResponseNotFound, sendResponseServerError, sendResponseUnauthorized, sendResponseUnprocessableEntity, sendUnprocessableEntityResponse }
+export { sendResponseConflict, sendLoginSuccessfullResponse, sendCreatedResponse, sendResponseAccessDenied, sendOkResponse, sendResponseBadRequest, sendResponseNoContent, sendResponseNotFound, sendResponseServerError, sendResponseUnauthorized, sendResponseUnprocessableEntity, sendUnprocessableEntityResponse }
