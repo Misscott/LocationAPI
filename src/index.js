@@ -9,6 +9,11 @@ import config from './config/index.js'
 import routes from './routes/index.js'
 import { error404, errorHandler } from './utils/errors.js'
 import { getRoutes } from './utils/links.js'
+/*import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)*/
 
 const app = express()
 dayjs.extend(utc)

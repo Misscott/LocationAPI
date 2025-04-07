@@ -8,7 +8,7 @@ const _endpointsQuery = (_pagination = '') => ({ count }) => ({ uuid, route, met
             SELECT
             ${count || `*`}
             FROM
-            mydb.endpoints as e
+            acloc.endpoints as e
             WHERE
             e.created <= :now
             AND
@@ -29,7 +29,7 @@ const countEndpointsQuery = rest =>
 
 const insertEndpointsQuery = () => {
     return `
-    INSERT INTO mydb.endpoints (
+    INSERT INTO acloc.endpoints (
       uuid,
       route,
       created,
@@ -41,26 +41,26 @@ const insertEndpointsQuery = () => {
       :now,
       :createdBy
     );
-    SELECT * FROM mydb.endpoints WHERE uuid = :uuid;
+    SELECT * FROM acloc.endpoints WHERE uuid = :uuid;
     `
 }
 
 const updateEndpointsQuery = (route) => {
     const routeCondition = route ? 'route = :route,' : '';
     return `
-    UPDATE mydb.endpoints
+    UPDATE acloc.endpoints
     SET
         ${routeCondition}
         uuid = :uuid
     WHERE uuid = :uuid
     AND deleted IS NULL;
-    SELECT * FROM mydb.endpoints WHERE uuid = :uuid;
+    SELECT * FROM acloc.endpoints WHERE uuid = :uuid;
     `
 }
 
 const softDeleteEndpointsQuery = () => {
     return `
-    UPDATE mydb.endpoints
+    UPDATE acloc.endpoints
     SET deleted = :deleted, deletedBy = :deletedBy
     WHERE uuid = :uuid
     AND deleted IS NULL
@@ -69,9 +69,9 @@ const softDeleteEndpointsQuery = () => {
 
 const deleteEndpointsQuery = () => {
     return `
-    DELETE FROM mydb.endpoints
+    DELETE FROM acloc.endpoints
     WHERE uuid = :uuid;
-    SELECT * FROM mydb.endpoints WHERE uuid = :uuid;
+    SELECT * FROM acloc.endpoints WHERE uuid = :uuid;
     `
 }
 

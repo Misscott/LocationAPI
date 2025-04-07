@@ -17,13 +17,13 @@ const _userListSelectQuery = (_pagination = '') =>
         const usernameCondition = username ? `AND users.username LIKE CONCAT('%',:username,'%')` : '';
         const emailCondition = email ? 'AND users.email = :email ' : '';
         const roleCondition = role ? 'AND users.fk_role = :role ' : '';  
-        const roleNameCondition = roleName ? 'AND users.fk_role = (SELECT id FROM mydb.roles WHERE name = :roleName)' : '';
+        const roleNameCondition = roleName ? 'AND users.fk_role = (SELECT id FROM acloc.roles WHERE name = :roleName)' : '';
         return `
           SELECT
             ${count || `users.*, r.name AS role`}  
           FROM
-            mydb.users as users
-            LEFT JOIN mydb.roles as r ON users.fk_role = r.id
+            acloc.users as users
+            LEFT JOIN acloc.roles as r ON acloc.fk_role = r.id
           WHERE
             users.created <= :now
           AND
@@ -62,10 +62,10 @@ const countUserListQuery = rest =>
  */
 const insertUserQuery = ({email, fk_role, createdBy}) => {
     const emailCondition = email ? ':email' : null;
-    const roleCondition = fk_role ? '(SELECT id FROM mydb.roles WHERE name = :fk_role)' : `(SELECT id FROM mydb.roles WHERE name = 'viewer')`;
+    const roleCondition = fk_role ? '(SELECT id FROM acloc.roles WHERE name = :fk_role)' : `(SELECT id FROM acloc.roles WHERE name = 'viewer')`;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
     return `
-    INSERT INTO mydb.users (
+    INSERT INTO acloc.users (
       uuid,
       username,
       password,
@@ -83,7 +83,7 @@ const insertUserQuery = ({email, fk_role, createdBy}) => {
       :now,
       ${createdByCondition}
     );
-    SELECT * FROM mydb.users WHERE uuid = :uuid;
+    SELECT * FROM acloc.users WHERE uuid = :uuid;
     `
 };
 
@@ -95,11 +95,11 @@ const modifyUserQuery = ({ username, password, email, role }) => {
   const usernameCondition = username ? `username = :username, ` : ``;
   const passwordCondition = password ? `password = :password, ` : ``;
   const emailCondition = email ? `email = :email, ` : ``;
-  const roleCondition = role ? `fk_role = (SELECT id FROM mydb.roles WHERE name = :role) ` : ``;
+  const roleCondition = role ? `fk_role = (SELECT id FROM acloc.roles WHERE name = :role) ` : ``;
 
   return `
     UPDATE
-      mydb.users
+      acloc.users
     SET
       ${usernameCondition}
       ${passwordCondition}
@@ -110,8 +110,8 @@ const modifyUserQuery = ({ username, password, email, role }) => {
       users.uuid = :uuid
     AND
       users.deleted IS NULL; 
-    SELECT mydb.users.*
-    FROM mydb.users
+    SELECT acloc.users.*
+    FROM acloc.users
     WHERE users.uuid = :uuid
   `;
 };
@@ -121,7 +121,7 @@ const modifyUserQuery = ({ username, password, email, role }) => {
  */
 const deleteUserQuery = () => {
   return `
-    DELETE FROM mydb.users
+    DELETE FROM acloc.users
     WHERE users.uuid = :uuid
   `;
 };
@@ -133,7 +133,7 @@ const deleteUserQuery = () => {
 const softDeleteUserQuery = () => {
     return `
     UPDATE
-        mydb.users
+        acloc.users
     SET
         deleted = :deleted, deletedby = :deletedBy
     WHERE

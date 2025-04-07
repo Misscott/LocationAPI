@@ -83,7 +83,7 @@ const softDeleteUserHasPlacesQuery = () => {
         UPDATE 
             mydb.users_has_places
         SET 
-            deleted = :now, deletedBy = :deletedBy
+            deleted = :deleted, deletedBy = :deletedBy
         WHERE
             users_has_places.uuid = :uuid
         AND 

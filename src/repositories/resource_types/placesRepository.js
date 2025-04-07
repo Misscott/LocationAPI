@@ -13,10 +13,12 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
             p.name,
             p.description,
             p.address,
-            p.latitude,
-            p.longitude,
+            c.latitude,
+            c.longitude,
             p.created,
             p.createdby
+        FROM acloc.places AS p
+        JOIN acloc.coordinates AS c ON p.fk_coordinates = c.id
         WHERE p.deleted IS NULL
         AND p.created <= :now
         AND (p.deleted > :now OR p.deleted IS NULL)
@@ -45,7 +47,7 @@ const insertPlaceQuery = ({ name, description, address, latitude, longitude, cre
     const longitudeCondition = longitude ? ':longitude' : null;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
     return `
-        INSERT INTO mydb.places (
+        INSERT INTO acloc.places (
             uuid,
             name,
             description,
@@ -77,7 +79,7 @@ const updatePlaceQuery = ({ uuid, name, description, address, latitude, longitud
     const longitudeCondition = longitude ? ':longitude' : null;
     const updatedByCondition = updatedBy ? 'updatedBy = :updatedBy' : null;
     return `
-        UPDATE mydb.places AS p
+        UPDATE acloc.places AS p
         SET
             name = ${nameCondition},
             description = ${descriptionCondition},
@@ -97,11 +99,13 @@ const deletePlaceQuery = ({ uuid, deletedBy }) => {
     const uuidCondition = uuid ? 'AND p.uuid = :uuid ' : '';
     const deletedByCondition = deletedBy ? 'deletedBy = :deletedBy' : null;
     return `
-        UPDATE mydb.places AS p
+        UPDATE acloc.places AS p
         SET
             deleted = NOW(),
             ${deletedByCondition}
-        WHERE p.deleted IS NULL
+        WHERE 
+            p.uuid = :uuid
+        AND p.deleted IS NULL
         AND p.created <= NOW()
         AND (p.deleted > NOW() OR p.deleted IS NULL)
         ${uuidCondition}

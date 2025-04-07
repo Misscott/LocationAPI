@@ -1,6 +1,6 @@
 export default {
 	environment: 'production',
-	port: 3005,
+	port: 3000,
 	bodyLimit: '300kb',
 	db: {
 		host: 'localhost',

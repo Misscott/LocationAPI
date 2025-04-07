@@ -16,7 +16,7 @@ const _roleSelectQuery = (_pagination = '') =>
           SELECT
             ${count || `*`}  
           FROM
-            mydb.roles as r
+            acloc.roles as r
           WHERE
             r.created <= :now
           AND
@@ -49,7 +49,7 @@ const countRoleQuery = rest =>
  */
 const insertRoleQuery = () => {
     return `
-    INSERT INTO mydb.roles (
+    INSERT INTO acloc.roles (
       uuid,
       name,
       created,
@@ -61,7 +61,7 @@ const insertRoleQuery = () => {
       :now,
       :createdBy
     );
-    SELECT * FROM mydb.roles WHERE uuid = :uuid;
+    SELECT * FROM acloc.roles WHERE uuid = :uuid;
     `
 };
 
@@ -74,7 +74,7 @@ const modifyRoleQuery = ({ name }) => {
 
   return `
     UPDATE
-      mydb.roles
+      acloc.roles
     SET
       ${nameCondition}
       uuid = :uuid
@@ -82,8 +82,8 @@ const modifyRoleQuery = ({ name }) => {
       roles.uuid = :uuid
     AND
       roles.deleted IS NULL;
-    SELECT mydb.roles.*
-    FROM mydb.roles
+    SELECT acloc.roles.*
+    FROM acloc.roles
     WHERE roles.uuid = :uuid
   `;
 };
@@ -93,7 +93,7 @@ const modifyRoleQuery = ({ name }) => {
  */
 const deleteRoleQuery = () => {
   return `
-    DELETE FROM mydb.roles
+    DELETE FROM acloc.roles
     WHERE roles.uuid = :uuid
   `;
 };
@@ -105,7 +105,7 @@ const deleteRoleQuery = () => {
 const softDeleteRoleQuery = () => {
     return `
     UPDATE
-        mydb.roles
+        acloc.roles
     SET
         deleted = :deleted, deletedby = :deletedBy
     WHERE
