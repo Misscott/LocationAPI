@@ -2,7 +2,6 @@
  * @fileoverview This file contains the route definitions for the user-related endpoints.
  */
 import {Router, text} from 'express'             
-import { getDeviceController, getDeviceByUuidController, postDeviceController, putDeviceController, deleteDeviceController} from '../controllers/resource_types/deviceController.js'
 import { getUserListController, getUserInfoController, postUserController, putUserController, softDeleteUserController } from '../controllers/authorization/userController.js'
 import { getRoleController, getRoleInfoController, postRoleController, putRoleController, deleteRoleController } from '../controllers/authorization/rolesController.js'
 import { getPermissionController, getPermissionByUuidController, postPermissionController, putPermissionController, softDeletePermissionController } from '../controllers/authorization/permissionsController.js'
@@ -36,12 +35,7 @@ import {
     putRolesHasPermissionsController, 
     softDeleteRolesHasPermissionsController,
  } from '../controllers/authorization/roles_has_permissionsController.js'
-import { 
-    getUsersHasDevicesController,
-    postUsersHasDevicesController, 
-    putUsersHasDevicesController, 
-    softDeleteUsersHasDevicesController,
- } from '../controllers/resource_types/usersHasDevicesController.js'
+
 /**
  * @function default 
  * @param {Object} configuration based on environment
@@ -66,7 +60,7 @@ export default(config) => {
     * Express router to mount user related functions on.
     * @type {Object}
     * @const
-    * @namespace deviceRouter
+    * @namespace placeRouter
     */
     const routes = Router()
     const hasAddLinks = config.environment !== 'production'
@@ -77,7 +71,7 @@ export default(config) => {
     * @name get/
     * @function
     * @inner
-    * @memberof deviceRouter
+    * @memberof placeRouter
     * @route GET /
     * @returns {Device} 200 - The data object with message 
     * @returns {ErrorResponse} 404 - Data not found
@@ -95,7 +89,7 @@ export default(config) => {
      * @name get/users
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /users
      * @group Users - Operations about users
      * @param {string} uuid.path.required - The unique identifier for the user
@@ -126,7 +120,7 @@ export default(config) => {
      * @name get/users/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /users/{uuid}
      * @group Users - Operations about users
      * @param {string} uuid.path.required - The unique identifier for the user
@@ -156,7 +150,7 @@ export default(config) => {
      * @name POST/users
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /users
      * @group Users - Operations about users
      * @param {string} username.path.required - The username of the user
@@ -192,7 +186,7 @@ export default(config) => {
      * @name PUT/users/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route PUT /users/{uuid}
      * @group Users - Operations about users
      * @param {string} uuid.path.required - The unique identifier for the user
@@ -228,7 +222,7 @@ export default(config) => {
      * @name delete/users/:uuid 
      * @function 
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route DELETE /users/{uuid}
      * @group Users - Operations about users
      * @param {string} uuid.path.required - The unique identifier for the user
@@ -255,7 +249,7 @@ export default(config) => {
         * @name GET/roles
         * @function
         * @inner
-        * @memberof deviceRouter
+        * @memberof placeRouter
         * @route GET /roles
         * @group Roles - Operations about roles
         * @param {string} uuid.path.required - The unique identifier for the role
@@ -282,7 +276,7 @@ export default(config) => {
      * @name GET/roles/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /roles/{uuid}
      * @group Roles - Operations about roles
      * @param {string} uuid.path.required - The unique identifier for the role
@@ -313,7 +307,7 @@ export default(config) => {
      * @name POST/roles
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /roles
      * @group Roles - Operations about roles
      * @param {string} name.path.required - The name of the role
@@ -342,7 +336,7 @@ export default(config) => {
      * @name PUT/roles/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route PUT /roles/{uuid}
      * @group Roles - Operations about roles
      * @param {string} uuid.path.required - The unique identifier for the role
@@ -374,7 +368,7 @@ export default(config) => {
      * @name DELETE/roles/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route DELETE /roles/{uuid}
      * @group Roles - Operations about roles
      * @param {string} uuid.path.required - The unique identifier for the role
@@ -405,7 +399,7 @@ export default(config) => {
      * @name GET/permissions
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /permissions
      * @group Permissions - Operations about permissions
      * @param {string} uuid.path.required - The unique identifier for the permission
@@ -434,7 +428,7 @@ export default(config) => {
      * @name GET/permissions/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /permissions/{uuid}
      * @group Permissions - Operations about permissions
      * @param {string} uuid.path.required - The unique identifier for the permission
@@ -459,6 +453,22 @@ export default(config) => {
         (result, req, res, _) => sendOkResponse(result, req, res)
     );
 
+    /**
+     * @name POST/permissions
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route POST /permissions
+     * @group Permissions - Operations about permissions
+     * @param {string} name.path.required - The name of the permission
+     * @param {string} uuid.path.required - The unique identifier for the permission
+     * @returns {SuccessResponse} 200 - Permission created successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Permission not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
     routes.post(
         '/permissions',
         (req, res, next) => authenticateToken(req, res, next, config),
@@ -476,7 +486,7 @@ export default(config) => {
      * @name PUT/permissions/:uuid 
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route PUT /permissions/{uuid}
      * @group Permissions - Operations about permissions
      * @param {string} uuid.path.required - The unique identifier for the permission
@@ -509,7 +519,7 @@ export default(config) => {
      * @name DELETE/permissions/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route DELETE /permissions/{uuid}
      * @group Permissions - Operations about permissions
      * @param {string} uuid.path.required - The unique identifier for the permission
@@ -539,7 +549,7 @@ export default(config) => {
      * @name GET/endpoints
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /endpoints
      * @group Endpoints - Operations about endpoints
      * @param {string} uuid.path.required - The unique identifier for the endpoint
@@ -569,7 +579,7 @@ export default(config) => {
      * @name GET/endpoints/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /endpoints/{uuid}
      * @group Endpoints - Operations about endpoints
      * @param {string} uuid.path.required - The unique identifier for the endpoint
@@ -599,7 +609,7 @@ export default(config) => {
      * @name POST/endpoints
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /endpoints
      * @group Endpoints - Operations about endpoints
      * @param {string} route.path.required - The name of the endpoint
@@ -627,7 +637,7 @@ export default(config) => {
      * @name PUT/endpoints/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route PUT /endpoints/{uuid}
      * @group Endpoints - Operations about endpoints
      * @param {string} uuid.path.required - The unique identifier for the endpoint
@@ -657,7 +667,7 @@ export default(config) => {
      * @name DELETE/endpoints/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route DELETE /endpoints/{uuid}
      * @group Endpoints - Operations about endpoints
      * @param {string} uuid.path.required - The unique identifier for the endpoint
@@ -686,7 +696,7 @@ export default(config) => {
      * @name GET/roles_has_permissions
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /roles_has_permissions
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} uuid.path.required - The unique identifier for the role permission
@@ -717,7 +727,7 @@ export default(config) => {
      * @name GET/roles_has_permissions/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route GET /roles_has_permissions/{uuid}
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} uuid.path.required - The unique identifier for the role permission
@@ -748,7 +758,7 @@ export default(config) => {
      * @name POST/roles_has_permissions
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /roles_has_permissions
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} fk_role.path.required - The unique identifier for the role
@@ -778,7 +788,7 @@ export default(config) => {
      * @name PUT/roles_has_permissions/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route PUT /roles_has_permissions/{uuid}
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} uuid.path.required - The unique identifier for the role permission
@@ -810,7 +820,7 @@ export default(config) => {
      * @name DELETE/roles_has_permissions/:uuid
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route DELETE /roles_has_permissions/{uuid}
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} uuid.path.required - The unique identifier for the role permission
@@ -841,7 +851,7 @@ export default(config) => {
      * @name POST/login
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /login
      * @group Login - Operations about login
      * @param {string} username.path.required - The username of the user
@@ -870,7 +880,7 @@ export default(config) => {
      * @name POST/refresh_token
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /refresh_token
      * @group Login - Operations about login
      * @param {string} refresh_token.path.required - The refresh token of the user
@@ -897,7 +907,7 @@ export default(config) => {
      * @name POST/signin
      * @function
      * @inner
-     * @memberof deviceRouter
+     * @memberof placeRouter
      * @route POST /signin
      * @group Login - Operations about login
      * @param {string} username.path.required - The username of the user
