@@ -5,8 +5,7 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
     const nameCondition = name ? `AND p.name LIKE CONCAT('%',:name,'%')` : '';
     const descriptionCondition = description ? `AND p.description LIKE CONCAT('%',:description,'%')` : '';
     const addressCondition = address ? `AND p.address LIKE CONCAT('%',:address,'%')` : '';
-    const latitudeCondition = latitude ? 'AND p.latitude = :latitude ' : '';
-    const longitudeCondition = longitude ? 'AND p.longitude = :longitude ' : '';
+    const fk_coordinateCondition = latitude && longitude ? 'AND fk_coordinate = (SELECT id FROM acloc.coordinates WHERE latitude = :latitude AND longitude = :longitude)' : '';
     return `
         SELECT
             p.uuid,
@@ -18,7 +17,7 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
             p.created,
             p.createdby
         FROM acloc.places AS p
-        JOIN acloc.coordinates AS c ON p.fk_coordinates = c.id
+        JOIN acloc.coordinates AS c ON p.fk_coordinate = c.id
         WHERE p.deleted IS NULL
         AND p.created <= :now
         AND (p.deleted > :now OR p.deleted IS NULL)
@@ -27,8 +26,7 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
         ${nameCondition}
         ${descriptionCondition}
         ${addressCondition}
-        ${latitudeCondition}
-        ${longitudeCondition}
+        ${fk_coordinateCondition}
         ${_pagination}
     `;
 }
@@ -39,12 +37,9 @@ const getPlaceListQuery = ({ limit, page, ...rest }) =>
 const countPlaceListQuery = rest =>
     _placeSelectQuery()({ count: 'COUNT(DISTINCT(p.uuid)) AS count' })(rest);
 
-const insertPlaceQuery = ({ name, description, address, latitude, longitude, createdBy }) => {
-    const nameCondition = name ? ':name' : null;
+const insertPlaceQuery = ({ description, address, createdBy }) => {
     const descriptionCondition = description ? ':description' : null;
     const addressCondition = address ? ':address' : null;
-    const latitudeCondition = latitude ? ':latitude' : null;
-    const longitudeCondition = longitude ? ':longitude' : null;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
     return `
         INSERT INTO acloc.places (
@@ -52,63 +47,53 @@ const insertPlaceQuery = ({ name, description, address, latitude, longitude, cre
             name,
             description,
             address,
-            latitude,
-            longitude,
+            fk_coordinates,
             created,
             createdBy
         )
         VALUES (
-            UUID(),
-            ${nameCondition},
+            :uuid,
+            :name,
             ${descriptionCondition},
             ${addressCondition},
-            ${latitudeCondition},
-            ${longitudeCondition},
-            NOW(),
+            (SELECT id FROM acloc.coordinates WHERE latitude = :latitude AND longitude = :longitude),
+            :now,
             ${createdByCondition}
         )
     `;
 }
 
-const updatePlaceQuery = ({ uuid, name, description, address, latitude, longitude, updatedBy }) => {
-    const uuidCondition = uuid ? 'AND p.uuid = :uuid ' : '';
-    const nameCondition = name ? ':name' : null;
-    const descriptionCondition = description ? ':description' : null;
-    const addressCondition = address ? ':address' : null;
-    const latitudeCondition = latitude ? ':latitude' : null;
-    const longitudeCondition = longitude ? ':longitude' : null;
-    const updatedByCondition = updatedBy ? 'updatedBy = :updatedBy' : null;
+const updatePlaceQuery = ({ name, description, address, latitude, longitude }) => {
+    const nameCondition = name ? 'name = :name,' : '';
+    const descriptionCondition = description ? 'description = :description,' : '';
+    const addressCondition = address ? 'address = :address' : '';
+    const fk_coordinateCondition = latitude && longitude ? 'fk_coordinate = (SELECT id FROM acloc.coordinates WHERE latitude = :latitude AND longitude = :longitude),' : '';
+
     return `
         UPDATE acloc.places AS p
         SET
-            name = ${nameCondition},
-            description = ${descriptionCondition},
-            address = ${addressCondition},
-            latitude = ${latitudeCondition},
-            longitude = ${longitudeCondition},
-            updated = NOW(),
-            ${updatedByCondition}
-        WHERE p.deleted IS NULL
+            ${nameCondition}
+            ${descriptionCondition}
+            ${addressCondition}
+            ${fk_coordinateCondition}
+        WHERE 
+            p.uuid = :uuid
+        AND p.deleted IS NULL   
         AND p.created <= NOW()
         AND (p.deleted > NOW() OR p.deleted IS NULL)
-        ${uuidCondition}
     `;
 }
 
-const deletePlaceQuery = ({ uuid, deletedBy }) => {
-    const uuidCondition = uuid ? 'AND p.uuid = :uuid ' : '';
-    const deletedByCondition = deletedBy ? 'deletedBy = :deletedBy' : null;
+const deletePlaceQuery = () => {
     return `
         UPDATE acloc.places AS p
         SET
-            deleted = NOW(),
-            ${deletedByCondition}
+            deleted = :deleted, deletedby = :deletedBy
         WHERE 
             p.uuid = :uuid
         AND p.deleted IS NULL
         AND p.created <= NOW()
         AND (p.deleted > NOW() OR p.deleted IS NULL)
-        ${uuidCondition}
     `;
 }
 
