@@ -2,8 +2,8 @@ import { pagination } from "../../utils/pagination";
 //reports repository
 const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, uuidUser, uuidPlace, uuidReportType }) => {
     const uuidCondition = uuid ? 'AND up.uuid = :uuid ' : '';
-    const uuidUserCondition = uuidUser ? 'AND up.fk_user = (SELECT id FROM mydb.users WHERE uuid = :uuidUser)' : '';
-    const uuidPlaceCondition = uuidPlace ? 'AND up.fk_place = (SELECT id FROM mydb.places WHERE uuid = :uuidPlace)' : '';
+    const uuidUserCondition = uuidUser ? 'AND up.fk_user = (SELECT id FROM acloc.users WHERE uuid = :uuidUser)' : '';
+    const uuidPlaceCondition = uuidPlace ? 'AND up.fk_place = (SELECT id FROM acloc.places WHERE uuid = :uuidPlace)' : '';
     const uuidReportTypeCondition = uuidReportType ? 'AND up.fk_report_type = (SELECT id FROM acloc.report_types WHERE uuid = :uuidReportType)' : '';
 
     return `
