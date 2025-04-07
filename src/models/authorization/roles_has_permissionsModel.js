@@ -1,4 +1,3 @@
-
 import { randomUUID as uuidv4 } from 'node:crypto'
 import dayjs from 'dayjs'
 import mysql from '../../adapters/mysql.js'
@@ -16,7 +15,7 @@ const getRolesHasPermissionsModel = ({conn, ...rest}) => {
 
     return mysql    
         .execute(getRolesHasPermissionsQuery(paramsToSearch), conn, paramsToSearch)
-        .then(results => results.map(({id, uuid, fk_role, fk_permission, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered))
+        .then(results => results.map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered))
 }
 
 const countRolesHasPermissionsModel = ({conn, ...rest}) => {
@@ -24,7 +23,7 @@ const countRolesHasPermissionsModel = ({conn, ...rest}) => {
 	const paramsToSearch = { ...rest, now }
 
     return mysql
-        .execute(countRolesHasPermissionsQuery(params), conn, paramsToSearch)
+        .execute(countRolesHasPermissionsQuery(paramsToSearch), conn, paramsToSearch)
         .then(results => results[0].count)
 }
 
