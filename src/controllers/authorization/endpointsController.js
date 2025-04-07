@@ -9,6 +9,7 @@ import {
 import { error404, errorHandler } from "../../utils/errors.js";
 import { sendResponseNotFound } from "../../utils/responses.js";
 import { noResults } from "../../validators/result-validators.js";
+import mysql from "../../adapters/mysql.js";
 
 const getEndpointsController = (req, res, next, config) => {
     const conn = mysql.start(config)
@@ -51,34 +52,6 @@ const getEndpointsByUuidController = (req, res, next, config) => {
             const result = {
                 _data: {
                     endpoints: endpointsInformation
-                }
-            }
-            next(result)
-        })
-        .catch((err) => {
-            const error = errorHandler(err, config.environment)
-            return res.status(error.code).json(error)
-        })
-        .finally(() => {
-            mysql.end(conn)
-        })
-}
-
-const getEndpointsByRouteController = (req, res, next, config) => {
-    const conn = mysql.start(config)
-    const route = req.params.route
-
-    getEndpointsModel({ route, conn })
-        .then((response) => {
-            if (noResults(response)) {
-                const err = error404()
-                const error = errorHandler(err, config.environment)
-                return sendResponseNotFound(res, error)
-            }
-
-            const result = {
-                _data: {
-                    endpoints: response
                 }
             }
             next(result)
@@ -172,7 +145,6 @@ const deleteEndpointsController = (req, res, next, config) => {
 export {
     getEndpointsController,
     getEndpointsByUuidController,
-    getEndpointsByRouteController,
     postEndpointsController,
     putEndpointsController,
     softDeleteEndpointsController,

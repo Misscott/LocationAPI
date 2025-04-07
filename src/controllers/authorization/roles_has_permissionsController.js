@@ -1,25 +1,24 @@
-import { error404, errorHandler } from '../../utils/errors.js'
-import { sendResponseNotFound } from '../../utils/responses.js'
-import { noResults } from '../../validators/result-validators.js'
 import mysql from '../../adapters/mysql.js'
 import { 
-    getPermissionModel,
-    countPermissionModel,
-    insertPermissionModel,
-    modifyPermissionModel,
-    softDeletePermissionModel
-} from '../../models/authorization/permissionsModel.js'
+    getRolesHasPermissionsModel,
+    countRolesHasPermissionsModel,
+    insertRolesHasPermissionsModel,
+    modifyRolesHasPermissionsModel,
+    softDeleteRolesHasPermissionsModel
+} from '../../models/authorization/roles_has_permissionsModel.js'
+import { errorHandler } from '../../utils/errors.js'
+import { noResults } from '../../validators/result-validators.js'
 
-const getPermissionController = (req, res, next, config) => {
+const getRolesHasPermissionsController = (req, res, next, config) => {
     const conn = mysql.start(config)
-
+    const uuidList = req.query.uuidList && req.query.uuidList.split(',')
     Promise.all([
-        getPermissionModel({...req.query, conn}),
-        countPermissionModel({...req.query, conn})
+        getRolesHasPermissionsModel({...req.query, uuidList, conn}),
+        countRolesHasPermissionsModel({...req.query, uuidList, conn})
     ])
         .then(([getResults, countResults]) => {
             next({
-                _data: {permissions: getResults},
+                _data: {roles_has_permissions: getResults},
                 _page: {
                     totalElements: countResults,
                     limit: req.query.limit || 100,
@@ -36,11 +35,10 @@ const getPermissionController = (req, res, next, config) => {
         })
 }
 
-const getPermissionByUuidController = (req, res, next, config) => {
-    const uuid_permission = req.params.uuid
+const getRolesHasPermissionsByUuidController = (req, res, next, config) => {
+    const uuid = req.params.uuid
     const conn = mysql.start(config)
-
-    getPermissionModel({ uuid_permission, conn })
+    getRolesHasPermissionsModel({ uuid, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()
@@ -50,7 +48,7 @@ const getPermissionByUuidController = (req, res, next, config) => {
 
             const result = {
                 _data: {
-                    permissions: response
+                    roles_has_permissions: response
                 }
             }
             next(result)
@@ -64,16 +62,14 @@ const getPermissionByUuidController = (req, res, next, config) => {
         })
 }
 
-const postPermissionController = (req, res, next, config) => {
+const postRolesHasPermissionsController = (req, res, next, config) => {
     const conn = mysql.start(config)
-    const created_by = req.auth.user || null
+    const createdBy = req.auth.user || null
 
-    insertPermissionModel({...req.body, created_by, conn})
-        .then((response) => {
+    insertRolesHasPermissionsModel({...req.body, createdBy, conn})
+        .then((roles_has_permissions) => {
             const result = {
-                _data: {
-                    permissions: response
-                }
+                _data: roles_has_permissions
             }
             next(result)
         })
@@ -86,16 +82,14 @@ const postPermissionController = (req, res, next, config) => {
         })
 }
 
-const putPermissionController = (req, res, next, config) => {
+const putRolesHasPermissionsController = (req, res, next, config) => {
     const conn = mysql.start(config)
-    const uuid_permission = req.params.uuid
+    const uuid = req.params.uuid
 
-    modifyPermissionModel({...req.body, uuid_permission, conn})
-        .then((response) => {
+    modifyRolesHasPermissionsModel({ ...req.body, uuid, modifiedBy, conn })
+        .then((roles_has_permissions) => {
             const result = {
-                _data: {
-                    permissions: response
-                }
+                _data: roles_has_permissions
             }
             next(result)
         })
@@ -108,12 +102,13 @@ const putPermissionController = (req, res, next, config) => {
         })
 }
 
-const softDeletePermissionController = (req, res, next, config) => {
+const softDeleteRolesHasPermissionsController = (req, res, next, config) => {
     const conn = mysql.start(config)
-    const uuid_permission = req.params.uuid
-    const deletedBy = req.auth.user || null
+    const uuid = req.params.uuid
+    const { deleted } = req.body
+	const deletedby = req.auth.user || null
 
-    softDeletePermissionModel({uuid_permission, deletedBy, conn})
+    softDeleteRolesHasPermissionsModel({ uuid, deleted, deletedby, conn })
         .then(() => {
             const result = {}
             next(result)
@@ -128,9 +123,9 @@ const softDeletePermissionController = (req, res, next, config) => {
 }
 
 export {
-    getPermissionController,
-    getPermissionByUuidController,
-    postPermissionController,
-    putPermissionController,
-    softDeletePermissionController
+    getRolesHasPermissionsController,
+    getRolesHasPermissionsByUuidController,
+    postRolesHasPermissionsController,
+    softDeleteRolesHasPermissionsController,
+    putRolesHasPermissionsController,
 }
