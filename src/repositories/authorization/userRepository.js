@@ -23,7 +23,7 @@ const _userListSelectQuery = (_pagination = '') =>
             ${count || `users.*, r.name AS role`}  
           FROM
             acloc.users as users
-            LEFT JOIN acloc.roles as r ON acloc.fk_role = r.id
+            LEFT JOIN acloc.roles as r ON users.fk_role = r.id
           WHERE
             users.created <= :now
           AND
@@ -63,7 +63,7 @@ const countUserListQuery = rest =>
 const insertUserQuery = ({email, fk_role, createdBy}) => {
     const emailCondition = email ? ':email' : null;
     const roleCondition = fk_role ? '(SELECT id FROM acloc.roles WHERE name = :fk_role)' : `(SELECT id FROM acloc.roles WHERE name = 'viewer')`;
-    const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
+    const createdByCondition = createdBy ? ':createdBy' : null;
     return `
     INSERT INTO acloc.users (
       uuid,

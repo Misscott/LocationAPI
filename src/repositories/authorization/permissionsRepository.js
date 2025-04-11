@@ -12,8 +12,10 @@ const _permissionsQuery = (_pagination = '') => ({count}) => ({uuid, action, end
         acloc.permissions as p
       LEFT JOIN
         acloc.endpoints as e ON p.fk_endpoint = e.id 
-        AND e.created <= :now
+      WHERE
+         e.created <= :now
         AND (e.deleted > :now OR e.deleted IS NULL)
+      AND
         p.created <= :now
       AND
         (p.deleted > :now OR p.deleted IS NULL)
@@ -31,11 +33,11 @@ const getPermissionsQuery = ({ limit, page, ...rest }) =>
 const countPermissionsQuery = rest => 
     _permissionsQuery()({ count: 'COUNT(*) AS count' })(rest);
 
-const insertPermissionsQuery = () => {
-    return `
+const insertPermissionsQuery = (createdBy) => {
+  const createdByCondition = createdBy ? ':createdBy' : null;
+  return `
     INSERT INTO acloc.permissions (
       uuid,
-      name,
       action,
       fk_endpoint,
       created,
@@ -43,21 +45,20 @@ const insertPermissionsQuery = () => {
     )
     VALUES (
       :uuid,
-      :name,
       :action,
       (SELECT id FROM acloc.endpoints WHERE route = :endpoint),
       :now,
-      :createdBy
+      ${createdByCondition}
     );
     SELECT * FROM acloc.permissions WHERE uuid = :uuid;
-    `
+  `
 }
 
 const modifyPermissionsQuery = (action, endpoint) => {
   const actionCondition = action ? 'action = :action ,' : '';
   const endpointCondition = endpoint ? 'fk_endpoint = (SELECT id from acloc.endpoints WHERE route = :endpoint),' : '';
   return `
-  UPDATE acloc.permissions
+  UPDATE acloc.permissions AS permissions
   SET 
       ${actionCondition}
       ${endpointCondition}
@@ -73,13 +74,13 @@ const modifyPermissionsQuery = (action, endpoint) => {
 const softDeletePermissionsQuery = () => {
     return `
     UPDATE 
-        acloc.permissions
+        acloc.permissions AS permissions
     SET 
         deleted = :now, deletedBy = :deletedBy
     WHERE
         permissions.uuid = :uuid
     AND 
-        permissions.deleted IS NULL    
+        permissions.deleted IS NULL;
     SELECT * FROM acloc.permissions WHERE uuid = :uuid;
     `
 }
