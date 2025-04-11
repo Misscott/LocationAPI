@@ -8,6 +8,8 @@ import {
 } from '../../models/authorization/roles_has_permissionsModel.js'
 import { errorHandler } from '../../utils/errors.js'
 import { noResults } from '../../validators/result-validators.js'
+import { error404 } from '../../utils/errors.js'
+import { sendResponseNotFound } from '../../utils/responses.js'
 
 const getRolesHasPermissionsController = (req, res, next, config) => {
     const conn = mysql.start(config)
@@ -88,6 +90,11 @@ const putRolesHasPermissionsController = (req, res, next, config) => {
 
     modifyRolesHasPermissionsModel({ ...req.body, uuid, modifiedBy, conn })
         .then((roles_has_permissions) => {
+            if (noResults(response)) {
+                const err = error404()
+                const error = errorHandler(err, config.environment)
+                return sendResponseNotFound(res, error)
+            }
             const result = {
                 _data: roles_has_permissions
             }

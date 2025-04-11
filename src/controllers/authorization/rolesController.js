@@ -29,12 +29,16 @@ const getRoleController = (req, res, next, config) => {
         countRoleModel({ ...queryParams, conn })
     ])
         .then(([getResults, countResults]) => {
+            // Calculate total pages for frontend pagination
+            const totalPages = Math.ceil(countResults / limit);
+            
             next({
-                _data: {roles: getResults},
+                _data: { role: getResults },
                 _page: {
                     totalElements: countResults,
-                    limit: req.query.limit || 100,
-                    page: req.query.page || (countResults && 1) || 0
+                    totalPages,
+                    limit,
+                    page
                 }
             })
         })
@@ -52,8 +56,8 @@ const getRoleInfoController = (req, res, next, config) => {
 	const uuid = req.params.uuid
 
 	getRoleModel({ uuid, conn })
-		.then((RoleInformation) => {
-			if (noResults(RoleInformation)) {
+		.then((roleInformation) => {
+			if (noResults(roleInformation)) {
 				const err = error404()
 				const error = errorHandler(err, config.environment)
 				return sendResponseNotFound(res, error)
@@ -61,7 +65,7 @@ const getRoleInfoController = (req, res, next, config) => {
 
 			const result = {
 				_data: {
-					roles: RoleInformation
+					role: roleInformation
 				}
 			}
 			next(result)
@@ -80,14 +84,22 @@ const postRoleController = (req, res, next, config) => {
 	const createdBy = req.auth.user || null
 
 	insertRoleModel({ ...req.body, createdBy, conn })
-		.then((RoleInformation) => {
+		.then((roleInformation) => {
 			const result = {
-				_data: { roles: RoleInformation }
+				_data: { role: roleInformation }
 			}
 
 			next(result)
 		})
 		.catch((err) => {
+			if (err.code === 'ER_DUP_ENTRY') {
+                const error = errorHandler(err, config.environment)
+                return res.status(error.code).json(error)
+            }
+            if (err.code === 'ER_BAD_NULL_ERROR') {
+                const error = error404()
+                return res.status(error.code).json(error)
+            }
 			const error = errorHandler(err, config.environment)
 			return res.status(error.code).json(error)
 		})
@@ -101,11 +113,16 @@ const putRoleController = (req, res, next, config) => {
 	const uuid = req.params.uuid
 
 	modifyRoleModel({ ...req.body, uuid, conn })
-		.then((RoleInformation) => {
+		.then((roleInformation) => {
+			if (noResults(response)) {
+                const err = error404()
+                const error = errorHandler(err, config.environment)
+                return sendResponseNotFound(res, error)
+            }
 			const result = {
 				_data: {
 					message: 'Role modified',
-					roles: RoleInformation
+					role: roleInformation
 				}
 			}
 			next(result)
