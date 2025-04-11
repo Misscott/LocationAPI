@@ -15,9 +15,8 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { integer, uuid, varChar} from '../validators/expressValidator/customValidators.js'
+import { uuid, varChar} from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
-import { error422, errorHandler } from '../utils/errors.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
 import { postRegisterController } from '../controllers/authorization/registerController.js'
 import { postRefreshTokenController } from '../controllers/authorization/refreshTokenController.js'
@@ -35,6 +34,10 @@ import {
     putRolesHasPermissionsController, 
     softDeleteRolesHasPermissionsController,
  } from '../controllers/authorization/roles_has_permissionsController.js'
+import { deletePlaceController, getPlaceByUuidController, getPlaceListController, insertPlaceController, modifyPlaceController } from '../controllers/resource_types/placesController.js'
+import { deleteCoordinatesController, getCoordinatesByUuidController, getCoordinatesListController, postCoordinatesController, putCoordinatesController } from '../controllers/resource_types/coordinatesController.js'
+import { deleteUserHasPlacesController, getUserHasPlacesByUuidController, getUserHasPlacesListController, postUserHasPlacesController, putUserHasPlacesController } from '../controllers/resource_types/usersHasPlacesController.js'
+import { getReportTypesByUuidController, getReportTypesListController, postReportTypesController, putReportTypesController, softDeleteReportTypesController } from '../controllers/resource_types/reportTypesController.js'
 
 /**
  * @function default 
@@ -89,7 +92,7 @@ export default(config) => {
      * @name get/users
      * @function
      * @inner
-     * @memberof placeRouter
+     * @memberof deviceRouter
      * @route GET /users
      * @group Users - Operations about users
      * @param {string} uuid.path.required - The unique identifier for the user
@@ -138,7 +141,9 @@ export default(config) => {
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/users/:uuid')(req, res, next, config),
         [
-            uuid('uuid')
+            uuid('uuid'),
+            varChar('username').optional({ nullable: false, values: 'falsy' }),
+            varChar('email').optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getUserInfoController(req, res, next, config),
@@ -453,28 +458,13 @@ export default(config) => {
         (result, req, res, _) => sendOkResponse(result, req, res)
     );
 
-    /**
-     * @name POST/permissions
-     * @function
-     * @inner
-     * @memberof placeRouter
-     * @route POST /permissions
-     * @group Permissions - Operations about permissions
-     * @param {string} name.path.required - The name of the permission
-     * @param {string} uuid.path.required - The unique identifier for the permission
-     * @returns {SuccessResponse} 200 - Permission created successfully
-     * @returns {ErrorResponse} 400 - Bad request
-     * @returns {ErrorResponse} 404 - Permission not found
-     * @returns {ErrorResponse} 422 - Unprocessable entity
-     * @returns {ErrorResponse} 500 - Internal server error
-     * @returns {ErrorResponse} 403 - Forbidden
-    */
     routes.post(
         '/permissions',
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/permissions')(req, res, next, config),
         [
-            varChar('name')
+            varChar('action'),
+            varChar('endpoint')
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => postPermissionController(req, res, next, config),
@@ -845,8 +835,638 @@ export default(config) => {
         (result, req, res, _) => sendResponseNoContent(result, req, res)
     );
 
-    // Login Endpoint
+    // Places Routes
+    /**
+     * @name GET/places
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /places
+     * @group Places - Operations about places
+     * @param {string} uuid.path.required - The unique identifier for the place
+     * @param {string} name.path.required - The name of the place
+     * @param {string} address.path.required - The address of the place
+     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @returns {SuccessResponse} 200 - The place object
+     * @returns {ErrorResponse} 404 - Place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.get(
+        '/places',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/places')(req, res, next, config),
+        [
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
+            varChar('name').optional({ nullable: false, values: 'falsy' }),
+            varChar('address').optional({ nullable: true, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' }),
+            uuid('fk_coordinate').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getPlaceListController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
 
+    /**
+     * @name GET/places/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /places/{uuid}
+     * @group Places - Operations about places
+     * @param {string} uuid.path.required - The unique identifier for the place
+     * @param {string} name.path.required - The name of the place
+     * @param {string} address.path.required - The address of the place
+     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @returns {SuccessResponse} 200 - The place object
+     * @returns {ErrorResponse} 404 - Place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.get(
+        '/places/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/places/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            varChar('name').optional({ nullable: false, values: 'falsy' }),
+            varChar('address').optional({ nullable: true, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' }),
+            uuid('fk_coordinate').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getPlaceByUuidController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name POST/places
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route POST /places
+     * @group Places - Operations about places
+     * @param {string} name.path.required - The name of the place
+     * @param {string} address.path.required - The address of the place
+     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @returns {SuccessResponse} 200 - Place created successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.post(
+        '/places',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/places')(req, res, next, config),
+        [
+            varChar('name'),
+            varChar('address').optional({ nullable: true, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' }),
+            uuid('fk_coordinate')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => insertPlaceController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name PUT/places/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route PUT /places/{uuid}
+     * @group Places - Operations about places
+     * @param {string} uuid.path.required - The unique identifier for the place
+     * @param {string} name.path.required - The name of the place
+     * @param {string} address.path.required - The address of the place
+     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @returns {SuccessResponse} 200 - Place updated successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.put(
+        '/places/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/places/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            varChar('name').optional({ nullable: false, values: 'falsy' }),
+            varChar('address').optional({ nullable: true, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' }),
+            uuid('fk_coordinate').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => modifyPlaceController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name DELETE/places/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route DELETE /places/{uuid}
+     * @group Places - Operations about places
+     * @param {string} uuid.path.required - The unique identifier for the place
+     * @returns {SuccessResponse} 200 - Place deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.delete(
+        '/places/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/places/:uuid')(req, res, next, config),
+        [
+            uuid('uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => deletePlaceController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    // Coordinates Routes
+    /**
+     * @name GET/coordinates
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /coordinates
+     * @group Coordinates - Operations about coordinates
+     * @param {string} uuid.path.required - The unique identifier for the coordinate
+     * @param {string} latitude.path.required - The latitude of the coordinate
+     * @param {string} longitude.path.required - The longitude of the coordinate
+     * @returns {SuccessResponse} 200 - The coordinate object
+     * @returns {ErrorResponse} 404 - Coordinate not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.get(
+        '/coordinates',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/coordinates')(req, res, next, config),
+        [
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
+            varChar('latitude').optional({ nullable: false, values: 'falsy' }),
+            varChar('longitude').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getCoordinatesListController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name GET/coordinates/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /coordinates/{uuid}
+     * @group Coordinates - Operations about coordinates
+     * @param {string} uuid.path.required - The unique identifier for the coordinate
+     * @param {string} latitude.path.required - The latitude of the coordinate
+     * @param {string} longitude.path.required - The longitude of the coordinate
+     * @returns {SuccessResponse} 200 - The coordinate object
+     * @returns {ErrorResponse} 404 - Coordinate not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.get(
+        '/coordinates/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/coordinates/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            varChar('latitude').optional({ nullable: false, values: 'falsy' }),
+            varChar('longitude').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getCoordinatesByUuidController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name POST/coordinates
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route POST /coordinates
+     * @group Coordinates - Operations about coordinates
+     * @param {string} latitude.path.required - The latitude of the coordinate
+     * @param {string} longitude.path.required - The longitude of the coordinate
+     * @returns {SuccessResponse} 200 - Coordinate created successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Coordinate not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.post(
+        '/coordinates',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/coordinates')(req, res, next, config),
+        [
+            varChar('latitude'),
+            varChar('longitude')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => postCoordinatesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name PUT/coordinates/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route PUT /coordinates/{uuid}
+     * @group Coordinates - Operations about coordinates
+     * @param {string} uuid.path.required - The unique identifier for the coordinate
+     * @param {string} latitude.path.required - The latitude of the coordinate
+     * @param {string} longitude.path.required - The longitude of the coordinate
+     * @returns {SuccessResponse} 200 - Coordinate updated successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Coordinate not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.put(
+        '/coordinates/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/coordinates/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            varChar('latitude').optional({ nullable: false, values: 'falsy' }),
+            varChar('longitude').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => putCoordinatesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name DELETE/coordinates/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route DELETE /coordinates/{uuid}
+     * @group Coordinates - Operations about coordinates
+     * @param {string} uuid.path.required - The unique identifier for the coordinate
+     * @returns {SuccessResponse} 200 - Coordinate deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Coordinate not found  
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.delete(
+        '/coordinates/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/coordinates/:uuid')(req, res, next, config),
+        [
+            uuid('uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => deleteCoordinatesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    //Reports routes
+    /**
+     * @name GET/users_has_places
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /reports
+     * @group Reports - Operations about reports
+     * @param {string} uuid.path.required - The unique identifier for the report
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @returns {SuccessResponse} 200 - The report object
+     * @returns {ErrorResponse} 404 - Report not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 400 - Bad request
+    */
+    routes.get(
+        '/reports',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/reports')(req, res, next, config),
+        [
+            uuid('uuid'),
+            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' })
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getUserHasPlacesListController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+    /**
+     * @name GET/reports/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /reports/{uuid}
+     * @group Reports - Operations about reports
+     * @param {string} uuid.path.required - The unique identifier for the report
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @returns {SuccessResponse} 200 - The report object
+     * @returns {ErrorResponse} 404 - Report not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 400 - Bad request
+    */
+    routes.get(
+        '/reports/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/reports/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' })
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getUserHasPlacesByUuidController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name POST/reports
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route POST /reports
+     * @group Reports - Operations about reports
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_report_type.path.required - The unique identifier for the report type
+     * @param {string} description.path.required - The description of the report
+     * @returns {SuccessResponse} 200 - Report created successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Report not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.post(
+        '/reports',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/reports')(req, res, next, config),
+        [
+            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => postUserHasPlacesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name PUT/reports/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route PUT /reports/{uuid}
+     * @group Reports - Operations about reports
+     * @param {string} uuid.path.required - The unique identifier for the report
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @param {string} fk_user.path.required - The unique identifier for the user   
+     * @param {string} fk_report_type.path.required - The unique identifier for the report type
+     * @param {string} description.path.required - The description of the report
+     * @returns {SuccessResponse} 200 - Report updated successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Report not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.put(
+        '/reports/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/reports/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => putUserHasPlacesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name DELETE/reports/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route DELETE /reports/{uuid}
+     * @group Reports - Operations about reports
+     * @param {string} uuid.path.required - The unique identifier for the report
+     * @returns {SuccessResponse} 200 - Report deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Report not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.delete(
+        '/reports/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/reports/:uuid')(req, res, next, config),
+        [
+            uuid('uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => deleteUserHasPlacesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    // Report Types Repository
+    /**
+     * @name GET/report_types
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /report_types
+     * @group Report Types - Operations about report types
+     * @param {string} uuid.path.required - The unique identifier for the report type
+     * @param {string} name.path.required - The name of the report type
+     * @returns {SuccessResponse} 200 - The report type object
+     * @returns {ErrorResponse} 404 - Report type not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.get(
+        '/report_types',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/report_types')(req, res, next, config),
+        [
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
+            varChar('name').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getReportTypesListController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name GET/report_types/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /report_types/{uuid}
+     * @group Report Types - Operations about report types
+     * @param {string} uuid.path.required - The unique identifier for the report type
+     * @param {string} name.path.required - The name of the report type
+     * @returns {SuccessResponse} 200 - The report type object
+     * @returns {ErrorResponse} 404 - Report type not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.get(
+        '/report_types/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/report_types/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            varChar('name').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getReportTypesByUuidController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+    /**
+     * @name POST/report_types
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route POST /report_types
+     * @group Report Types - Operations about report types
+     * @param {string} name.path.required - The name of the report type
+     * @returns {SuccessResponse} 200 - Report type created successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Report type not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.post(
+        '/report_types',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/report_types')(req, res, next, config),
+        [
+            varChar('name')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => postReportTypesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name PUT/report_types/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route PUT /report_types/{uuid}
+     * @group Report Types - Operations about report types
+     * @param {string} uuid.path.required - The unique identifier for the report type
+     * @param {string} name.path.required - The name of the report type
+     * @returns {SuccessResponse} 200 - Report type updated successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Report type not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.put(
+        '/report_types/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/report_types/:uuid')(req, res, next, config),
+        [
+            uuid('uuid'),
+            varChar('name').optional({ nullable: false, values: 'falsy' }),
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => putReportTypesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name DELETE/report_types/:uuid
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route DELETE /report_types/{uuid}
+     * @group Report Types - Operations about report types
+     * @param {string} uuid.path.required - The unique identifier for the report type
+     * @returns {SuccessResponse} 200 - Report type deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Report type not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.delete(
+        '/report_types/:uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/report_types/:uuid')(req, res, next, config),
+        [
+            uuid('uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => softDeleteReportTypesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    // Login Endpoint
     /**
      * @name POST/login
      * @function
@@ -862,6 +1482,8 @@ export default(config) => {
      * @returns {ErrorResponse} 422 - Unprocessable entity
      * @returns {ErrorResponse} 500 - Internal server error
      * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 409 - Conflict
     */
     routes.post(
         '/login',
