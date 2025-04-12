@@ -1,4 +1,4 @@
-import { pagination } from "../../utils/pagination";
+import { pagination } from "../../utils/pagination.js";
 
 const _coordinatesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, latitude, longitude }) => {
     const uuidCondition = uuid ? 'AND c.uuid = :uuid ' : '';

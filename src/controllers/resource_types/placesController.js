@@ -4,9 +4,8 @@ import {
     insertPlaceModel,
     modifyPlaceModel,
     deletePlaceModel
- } from "../../models/resource_types/placesModel";
+} from "../../models/resource_types/placesModel.js";
 import { error404 } from "../../utils/errors.js"
-import { sendResponseNotFound } from "../../utils/responses.js"
 import { noResults } from "../../validators/result-validators.js"
 import mysql from "../../adapters/mysql.js"
 import { errorHandler } from "../../utils/errors.js"

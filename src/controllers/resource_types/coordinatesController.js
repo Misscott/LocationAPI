@@ -4,12 +4,12 @@ import {
     insertCoordinatesModel,
     modifyCoordinatesModel,
     softDeleteCoordinatesModel
-} from "../../models/resource_types/coordinatesModel";
-import { error404 } from "../../utils/errors";
-import { sendResponseNotFound } from "../../utils/responses";
-import { noResults } from "../../validators/result-validators";
+} from "../../models/resource_types/coordinatesModel.js";
+import { error404 } from "../../utils/errors.js"
+import { sendResponseNotFound } from "../../utils/responses.js";
+import { noResults } from "../../validators/result-validators.js";
 import mysql from "../../adapters/mysql.js";
-import { errorHandler } from "../../utils/errors";
+import { errorHandler } from "../../utils/errors.js";
 
 const getCoordinatesListController = (req, res, next, config) => {
     const conn = mysql.start(config)

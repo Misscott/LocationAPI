@@ -1,5 +1,5 @@
 import { getUserHasPlacesListQuery, countUserHasPlacesListQuery, insertUserHasPlacesQuery, modifyUserHasPlacesQuery, softDeleteUserHasPlacesQuery
-} from "../../repositories/resource_types/usersHasPlacesRepository";
+} from "../../repositories/resource_types/usersHasPlacesRepository.js";
 import { randomUUID as uuidv4 } from 'node:crypto'
 import dayjs from 'dayjs'
 import mysql from '../../adapters/mysql.js'

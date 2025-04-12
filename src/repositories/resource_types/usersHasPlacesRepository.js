@@ -1,4 +1,4 @@
-import { pagination } from "../../utils/pagination";
+import { pagination } from "../../utils/pagination.js";
 //reports repository
 const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, uuidUser, uuidPlace, uuidReportType }) => {
     const uuidCondition = uuid ? 'AND up.uuid = :uuid ' : '';

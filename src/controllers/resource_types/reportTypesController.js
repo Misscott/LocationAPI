@@ -6,9 +6,9 @@ import { noResults } from "../../validators/result-validators.js";
 import {
     getReportTypesListModel,
     countReportTypesListModel,
-    insertReportTypesListModel,
-    modifyReportTypesListModel,
-    softDeleteReportTypesListModel
+    insertReportTypesModel,
+    modifyReportTypesModel,
+    softDeleteReportTypesModel
 } from "../../models/resource_types/reportTypesModel.js";
 
 const getReportTypesListController = (req, res, next, config) => {
@@ -69,7 +69,7 @@ const postReportTypesController = (req, res, next, config) => {
     const conn = mysql.start(config);
     const created_by = req.auth.user || null
 
-    insertReportTypesListModel({ ...req.body, created_by, conn })
+    insertReportTypesModel({ ...req.body, created_by, conn })
         .then((response) => {
             const result = {
                 _data: {
@@ -91,7 +91,7 @@ const putReportTypesController = (req, res, next, config) => {
     const conn = mysql.start(config);
     const uuid_report_type = req.params.uuid;
 
-    modifyReportTypesListModel({ ...req.body, uuid: uuid_report_type, conn })
+    modifyReportTypesModel({ ...req.body, uuid: uuid_report_type, conn })
         .then((response) => {
             const result = {
                 _data: {
@@ -114,7 +114,7 @@ const softDeleteReportTypesController = (req, res, next, config) => {
     const uuid_report_type = req.params.uuid;
     const deleted_by = req.auth.user || null
 
-    softDeleteReportTypesListModel({ uuid: uuid_report_type, deleted_by, conn })
+    softDeleteReportTypesModel({ uuid: uuid_report_type, deleted_by, conn })
         .then(() => {
             const result = {}
             next(result);

@@ -4,7 +4,7 @@ import {
     insertPlaceQuery,
     updatePlaceQuery,
     deletePlaceQuery
-} from "../../repositories/resource_types/placesRepository";
+} from "../../repositories/resource_types/placesRepository.js";
 import { randomUUID as uuidv4 } from 'node:crypto'
 import dayjs from 'dayjs'
 import mysql from '../../adapters/mysql.js'
@@ -56,7 +56,6 @@ const deletePlaceModel = ({uuid, deleted, deletedBy, conn}) => {
 export {
     getPlaceListModel,
     countPlaceListModel,
-    getPlaceByUuidModel,
     insertPlaceModel,
     modifyPlaceModel,
     deletePlaceModel

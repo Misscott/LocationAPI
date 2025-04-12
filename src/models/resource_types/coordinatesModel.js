@@ -4,7 +4,7 @@ import {
     insertCoordinatesQuery,
     updateCoordinatesQuery,
     softDeleteCoordinatesQuery
-} from "../../repositories/resource_types/coordinatesRepository";
+} from "../../repositories/resource_types/coordinatesRepository.js";
 import { randomUUID as uuidv4 } from 'node:crypto'
 import dayjs from 'dayjs'
 import mysql from '../../adapters/mysql.js'

@@ -4,7 +4,7 @@ import {
     insertReportTypesQuery,
     updateReportTypesQuery,
     softDeleteReportTypesQuery,
-} from "../../repositories/resource_types/reportTypesRepository";
+} from "../../repositories/resource_types/reportTypesRepository.js";
 import { randomUUID as uuidv4 } from 'node:crypto'
 import dayjs from 'dayjs'
 import mysql from '../../adapters/mysql.js'
