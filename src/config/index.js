@@ -1,6 +1,6 @@
 import process from 'node:process'
-import development from './development.js'
-import production from './production.js'
+import development from './development.dist.js'
+import production from './production.dist.js'
 
 
 const getConfig = () => {
