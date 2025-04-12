@@ -4,8 +4,8 @@ export default {
 	bodyLimit: '300kb',
 	db: {
 		host: 'localhost',
-		user: '~',
-		password: '~',
+		user: 'root',
+		password: '1234',
 		timezone: '+00:00',
 		decimalNumbers: true
 	}
