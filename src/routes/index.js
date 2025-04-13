@@ -15,7 +15,8 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { uuid, varChar} from '../validators/expressValidator/customValidators.js'
+import { integer, uuid, varChar } from '../validators/expressValidator/customValidators.js'
+import { integerRange } from '../validators/expressValidator/integerRangeValidator.js' // Adjust the path as needed
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
 import { postRegisterController } from '../controllers/authorization/registerController.js'
@@ -1181,7 +1182,8 @@ export default(config) => {
             uuid('uuid'),
             uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
             uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' })
+            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getUserHasPlacesListController(req, res, next, config),
@@ -1214,7 +1216,8 @@ export default(config) => {
             uuid('uuid'),
             uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
             uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' })
+            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getUserHasPlacesByUuidController(req, res, next, config),
@@ -1245,9 +1248,10 @@ export default(config) => {
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/reports')(req, res, next, config),
         [
-            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            uuid('uuidPlace'),
+            uuid('uuidUser'),
+            uuid('uuidReportType'),
+            integerRange('rating', {min: 1, max: 3}),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
@@ -1284,6 +1288,7 @@ export default(config) => {
             uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
             uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
             uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),

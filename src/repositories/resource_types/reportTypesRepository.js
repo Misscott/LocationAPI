@@ -4,11 +4,8 @@ const _coordinatesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, na
     const uuidCondition = uuid ? 'AND rt.uuid = :uuid ' : '';
     const nameCondition = name ? `AND rt.name LIKE CONCAT('%',:name,'%')` : '';
     return `
-        SELECT
-            rt.uuid,
-            rt.name,
-            rt.created,
-            rt.createdby
+        SELECT ${count ||
+            `*`}
         FROM acloc.report_types AS rt
         WHERE rt.created <= :now
         AND (rt.deleted > :now OR rt.deleted IS NULL)

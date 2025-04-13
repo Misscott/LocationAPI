@@ -6,12 +6,12 @@ const _coordinatesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, la
     const longitudeCondition = longitude ? 'AND c.longitude = :longitude ' : '';
 
     return `
-        SELECT
-            c.uuid,
+        SELECT ${count ||
+            `c.uuid,
             c.created,
             c.createdby,
             c.latitude,
-            c.longitude
+            c.longitude`}
         FROM acloc.coordinates AS c
         WHERE c.created <= :now
         AND (c.deleted > :now OR c.deleted IS NULL)

@@ -7,15 +7,14 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
     const addressCondition = address ? `AND p.address LIKE CONCAT('%',:address,'%')` : '';
     const fk_coordinateCondition = latitude && longitude ? 'AND fk_coordinate = (SELECT id FROM acloc.coordinates WHERE latitude = :latitude AND longitude = :longitude)' : '';
     return `
-        SELECT
-            p.uuid,
+        SELECT ${count ||
+            `p.uuid,
             p.name,
             p.description,
             p.address,
             c.latitude,
             c.longitude,
-            p.created,
-            p.createdby
+            p.created`}
         FROM acloc.places AS p
         JOIN acloc.coordinates AS c ON p.fk_coordinate = c.id
         WHERE p.deleted IS NULL

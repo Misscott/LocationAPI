@@ -1,24 +1,20 @@
 import { pagination } from "../../utils/pagination.js";
 //reports repository
-const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, uuidUser, uuidPlace, uuidReportType }) => {
+const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, uuidUser, uuidPlace, uuidReportType, rating }) => {
     const uuidCondition = uuid ? 'AND up.uuid = :uuid ' : '';
     const uuidUserCondition = uuidUser ? 'AND up.fk_user = (SELECT id FROM acloc.users WHERE uuid = :uuidUser)' : '';
     const uuidPlaceCondition = uuidPlace ? 'AND up.fk_place = (SELECT id FROM acloc.places WHERE uuid = :uuidPlace)' : '';
     const uuidReportTypeCondition = uuidReportType ? 'AND up.fk_report_type = (SELECT id FROM acloc.report_types WHERE uuid = :uuidReportType)' : '';
-
+    const ratingCondition = rating ? 'AND up.rating = :rating' : '';
     return `
-        SELECT
-            up.uuid,
-            up.fk_user,
-            up.fk_place,
-            up.created,
-            up.createdby,
+        SELECT ${count ||
+            `up.*,
             u.username AS user_username,
             u.uuid AS user_uuid,
             p.name AS place_name,
             p.uuid AS place_uuid,
             rt.name AS report_type_name,
-            rt.uuid AS report_type_uuid
+            rt.uuid AS report_type_uuid`}
         FROM acloc.users_has_places AS up
         JOIN acloc.users AS u ON up.fk_user = u.id
         JOIN acloc.places AS p ON up.fk_place = p.id
@@ -33,6 +29,7 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
         ${uuidUserCondition}
         ${uuidPlaceCondition}
         ${uuidReportTypeCondition}
+        ${ratingCondition}
         ${_pagination}
     `;
 }
@@ -48,12 +45,14 @@ const insertUserHasPlacesQuery = ({ uuidUser, uuidPlace, createdBy, uuidReportTy
     const uuidPlaceCondition = uuidPlace ? '(SELECT id FROM acloc.places WHERE uuid = :uuidPlace),' : null;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
     const reportTypeCondition = uuidReportType ? '(SELECT id FROM acloc.report_types WHERE uuid = :reportType),' : null;
+    
     return `
         INSERT INTO acloc.users_has_places (
             uuid,
             fk_user,
             fk_place,
             fk_report_type,
+            rating,
             created,
             createdBy
         )
@@ -62,6 +61,7 @@ const insertUserHasPlacesQuery = ({ uuidUser, uuidPlace, createdBy, uuidReportTy
             ${uuidUserCondition}
             ${uuidPlaceCondition}
             ${reportTypeCondition}
+            :rating,
             :now,
             ${createdByCondition}
         );
@@ -69,16 +69,18 @@ const insertUserHasPlacesQuery = ({ uuidUser, uuidPlace, createdBy, uuidReportTy
     `
 }
 
-const modifyUserHasPlacesQuery = (uuidUser, uuidPlace, uuidReportType) => {
+const modifyUserHasPlacesQuery = (uuidUser, uuidPlace, uuidReportType, rating) => {
     const uuidUserCondition = uuidUser ? 'fk_user = (SELECT id FROM acloc.users WHERE uuid = :uuidUser)' : ``;
     const uuidPlaceCondition = uuidPlace ? 'fk_place = (SELECT id FROM acloc.places WHERE uuid = :uuidPlace)' : ``;
     const uuidReportTypeCondition = uuidReportType ? 'fk_report_type = (SELECT id FROM acloc.report_types WHERE uuid = :uuidReportType)' : ``;
+    const ratingCondition = rating ? 'rating = :rating' : ``;
     return `
         UPDATE acloc.users_has_places
         SET 
             ${uuidUserCondition}
             ${uuidPlaceCondition}
             ${uuidReportTypeCondition}
+            ${ratingCondition}
             uuid = :uuid
         WHERE
             users_has_places.uuid = :uuid
