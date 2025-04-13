@@ -16,7 +16,7 @@ import {
     sendResponseNoContent,
 } from '../utils/responses.js'
 import { integer, uuid, varChar } from '../validators/expressValidator/customValidators.js'
-import { integerRange } from '../validators/expressValidator/integerRangeValidator.js' // Adjust the path as needed
+import { integerRange } from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
 import { postRegisterController } from '../controllers/authorization/registerController.js'

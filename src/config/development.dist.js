@@ -1,6 +1,6 @@
 export default {
 	environment: 'development',
-	port: 3306,
+	port: 3000,
 	bodyLimit: '300kb',
 	db: {
 		host: 'ls-f85b70f391f2c9e6cf335dafef04161a8a719f25.cf88wacmc99x.eu-west-3.rds.amazonaws.com',
