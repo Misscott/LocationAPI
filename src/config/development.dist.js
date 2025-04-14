@@ -8,5 +8,6 @@ export default {
 		password: 'NZU~jdR28NWC25qw5o81m|ki#Ib?a{Nk',
 		timezone: '+00:00',
 		decimalNumbers: true
-	}
+	},
+	saltRounds: 10
 }
