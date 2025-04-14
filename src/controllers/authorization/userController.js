@@ -118,7 +118,7 @@ const putUserController = (req, res, next, config) => {
 
 	modifyUserModel({ ...req.body, uuid, conn })
 		.then((users) => {
-			if (noResults(response)) {
+			if (noResults(users)) {
                 const err = error404()
                 const error = errorHandler(err, config.environment)
                 return sendResponseNotFound(res, error)

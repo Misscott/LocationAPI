@@ -90,7 +90,7 @@ const putRolesHasPermissionsController = (req, res, next, config) => {
 
     modifyRolesHasPermissionsModel({ ...req.body, uuid, modifiedBy, conn })
         .then((roles_has_permissions) => {
-            if (noResults(response)) {
+            if (noResults(roles_has_permissions)) {
                 const err = error404()
                 const error = errorHandler(err, config.environment)
                 return sendResponseNotFound(res, error)

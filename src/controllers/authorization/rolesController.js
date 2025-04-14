@@ -114,7 +114,7 @@ const putRoleController = (req, res, next, config) => {
 
 	modifyRoleModel({ ...req.body, uuid, conn })
 		.then((roleInformation) => {
-			if (noResults(response)) {
+			if (noResults(roleInformation)) {
                 const err = error404()
                 const error = errorHandler(err, config.environment)
                 return sendResponseNotFound(res, error)
