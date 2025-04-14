@@ -112,32 +112,45 @@ const postUserController = (req, res, next, config) => {
 		})
 }
 
-const putUserController = (req, res, next, config) => {
+const putUserController = async (req, res, next, config) => {
 	const conn = mysql.start(config)
 	const uuid = req.params.uuid
+	const { username, password, email, fk_role } = req.body
 
-	modifyUserModel({ ...req.body, uuid, conn })
-		.then((users) => {
-			if (noResults(users)) {
-                const err = error404()
-                const error = errorHandler(err, config.environment)
-                return sendResponseNotFound(res, error)
-            }
-			const result = {
-				_data: {
-					message: 'User modified',
-					users
-				}
-			}
-			next(result)
-		})
-		.catch((err) => {
+	try {
+		let updatedData = { uuid }
+
+		if (username) updatedData.username = username
+		if (email) updatedData.email = email
+		if (fk_role) updatedData.fk_role = fk_role
+
+		if (password) {
+			const hashedPassword = await bcrypt.hash(password, 10)
+			updatedData.password = hashedPassword
+		}
+
+		const users = await modifyUserModel({ ...updatedData, conn })
+
+		if (noResults(users)) {
+			const err = error404()
 			const error = errorHandler(err, config.environment)
-			return res.status(error.code).json(error)
-		})
-		.finally(() => {
-			mysql.end(conn)
-		})
+			return sendResponseNotFound(res, error)
+		}
+
+		const result = {
+			_data: {
+				message: 'User modified',
+				users
+			}
+		}
+		next(result)
+
+	} catch (err) {
+		const error = errorHandler(err, config.environment)
+		return res.status(error.code).json(error)
+	} finally {
+		mysql.end(conn)
+	}
 }
 
 const softDeleteUserController = (req, res, next, config) => {
