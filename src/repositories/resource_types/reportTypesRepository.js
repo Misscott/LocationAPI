@@ -6,7 +6,7 @@ const _coordinatesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, na
     return `
         SELECT ${count ||
             `*`}
-        FROM acloc.report_types AS rt
+        FROM dbmaster.report_types AS rt
         WHERE rt.created <= :now
         AND (rt.deleted > :now OR rt.deleted IS NULL)
         AND true
@@ -24,7 +24,7 @@ const countReportTypesListQuery = rest =>
 
 const insertReportTypesQuery = () => {
     return `
-        INSERT INTO acloc.report_types (
+        INSERT INTO dbmaster.report_types (
             uuid,
             name,
             created,
@@ -36,33 +36,33 @@ const insertReportTypesQuery = () => {
             :now,
             :createdBy
         );
-        SELECT * FROM acloc.report_types WHERE uuid = :uuid;
+        SELECT * FROM dbmaster.report_types WHERE uuid = :uuid;
     `
 }
 
 const updateReportTypesQuery = (name) => {
     const nameCondition = name ? 'name = :name,' : '';
     return `
-        UPDATE acloc.report_types
+        UPDATE dbmaster.report_types
         SET
             ${nameCondition}
             uuid = :uuid
         WHERE uuid = :uuid
         AND deleted IS NULL;
-        SELECT * FROM acloc.report_types WHERE uuid = :uuid;
+        SELECT * FROM dbmaster.report_types WHERE uuid = :uuid;
     `
 }
 
 const softDeleteReportTypesQuery = () => {
     return `
         UPDATE 
-            acloc.report_types
+            dbmaster.report_types
         SET
             deleted = :deleted,
             deletedBy = :deletedBy
         WHERE uuid = :uuid
         AND deleted IS NULL;
-        SELECT * FROM acloc.report_types WHERE uuid = :uuid;
+        SELECT * FROM dbmaster.report_types WHERE uuid = :uuid;
     `
 }
 

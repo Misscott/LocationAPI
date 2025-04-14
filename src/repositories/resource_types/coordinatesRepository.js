@@ -12,7 +12,7 @@ const _coordinatesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, la
             c.createdby,
             c.latitude,
             c.longitude`}
-        FROM acloc.coordinates AS c
+        FROM dbmaster.coordinates AS c
         WHERE c.created <= :now
         AND (c.deleted > :now OR c.deleted IS NULL)
         AND true
@@ -31,7 +31,7 @@ const countCoordinatesListQuery = rest =>
 
 const insertCoordinatesQuery = () => {
     return `
-        INSERT INTO acloc.coordinates (
+        INSERT INTO dbmaster.coordinates (
             uuid,
             latitude,
             longitude,
@@ -45,7 +45,7 @@ const insertCoordinatesQuery = () => {
             :now,
             :createdBy
         );
-        SELECT * FROM acloc.coordinates WHERE uuid = :uuid;
+        SELECT * FROM dbmaster.coordinates WHERE uuid = :uuid;
     `
 }
 
@@ -53,21 +53,21 @@ const updateCoordinatesQuery = (latitude, longitude) => {
     const latitudeCondition = latitude ? 'latitude = :latitude,' : '';
     const longitudeCondition = longitude ? 'longitude = :longitude,' : '';
     return `
-        UPDATE acloc.coordinates
+        UPDATE dbmaster.coordinates
         SET
             ${latitudeCondition}
             ${longitudeCondition}
             uuid = :uuid
         WHERE uuid = :uuid
         AND deleted IS NULL;
-        SELECT * FROM acloc.coordinates WHERE uuid = :uuid;
+        SELECT * FROM dbmaster.coordinates WHERE uuid = :uuid;
     `
 }
 
 const softDeleteCoordinatesQuery = () => {
     return `
         UPDATE 
-            acloc.coordinates
+            dbmaster.coordinates
         SET
             deleted = :deleted, deletedby = :deletedBy
         WHERE uuid = :uuid

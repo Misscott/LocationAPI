@@ -3,15 +3,15 @@ import { pagination } from '../../utils/pagination.js'
 const _permissionsQuery = (_pagination = '') => ({count}) => ({uuid, action, endpoint}) => {
     const uuidCondition = uuid ? 'AND uuid = :uuid ' : '';
     const actionCondition = action ? 'AND action = :action ' : '';
-    const endpointCondition = endpoint ? 'AND fk_endpoint = (SELECT id from acloc.endpoints WHERE route = :endpoint)' : '';
+    const endpointCondition = endpoint ? 'AND fk_endpoint = (SELECT id from dbmaster.endpoints WHERE route = :endpoint)' : '';
     return `
       SELECT
         ${count || 
             `*`}
       FROM
-        acloc.permissions as p
+        dbmaster.permissions as p
       LEFT JOIN
-        acloc.endpoints as e ON p.fk_endpoint = e.id 
+        dbmaster.endpoints as e ON p.fk_endpoint = e.id 
       WHERE
          e.created <= :now
         AND (e.deleted > :now OR e.deleted IS NULL)
@@ -36,7 +36,7 @@ const countPermissionsQuery = rest =>
 const insertPermissionsQuery = (createdBy) => {
   const createdByCondition = createdBy ? ':createdBy' : null;
   return `
-    INSERT INTO acloc.permissions (
+    INSERT INTO dbmaster.permissions (
       uuid,
       action,
       fk_endpoint,
@@ -46,19 +46,19 @@ const insertPermissionsQuery = (createdBy) => {
     VALUES (
       :uuid,
       :action,
-      (SELECT id FROM acloc.endpoints WHERE route = :endpoint),
+      (SELECT id FROM dbmaster.endpoints WHERE route = :endpoint),
       :now,
       ${createdByCondition}
     );
-    SELECT * FROM acloc.permissions WHERE uuid = :uuid;
+    SELECT * FROM dbmaster.permissions WHERE uuid = :uuid;
   `
 }
 
 const modifyPermissionsQuery = (action, endpoint) => {
   const actionCondition = action ? 'action = :action ,' : '';
-  const endpointCondition = endpoint ? 'fk_endpoint = (SELECT id from acloc.endpoints WHERE route = :endpoint),' : '';
+  const endpointCondition = endpoint ? 'fk_endpoint = (SELECT id from dbmaster.endpoints WHERE route = :endpoint),' : '';
   return `
-  UPDATE acloc.permissions AS permissions
+  UPDATE dbmaster.permissions AS permissions
   SET 
       ${actionCondition}
       ${endpointCondition}
@@ -67,21 +67,21 @@ const modifyPermissionsQuery = (action, endpoint) => {
       permissions.uuid = :uuid
   AND 
       permissions.deleted IS NULL;
-  SELECT * FROM acloc.permissions WHERE uuid = :uuid;
+  SELECT * FROM dbmaster.permissions WHERE uuid = :uuid;
   `
 }
 
 const softDeletePermissionsQuery = () => {
     return `
     UPDATE 
-        acloc.permissions AS permissions
+        dbmaster.permissions AS permissions
     SET 
         deleted = :now, deletedBy = :deletedBy
     WHERE
         permissions.uuid = :uuid
     AND 
         permissions.deleted IS NULL;
-    SELECT * FROM acloc.permissions WHERE uuid = :uuid;
+    SELECT * FROM dbmaster.permissions WHERE uuid = :uuid;
     `
 }
 
