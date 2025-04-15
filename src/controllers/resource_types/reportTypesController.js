@@ -102,7 +102,7 @@ const putReportTypesController = (req, res, next, config) => {
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment);
-            return res.status(error.code).json(error);
+            res.status(error.code).json(error);
         })
         .finally(() => {
             mysql.end(conn);
@@ -121,7 +121,7 @@ const softDeleteReportTypesController = (req, res, next, config) => {
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment);
-            return res.status(error.code).json(error);
+            res.status(error.code).json(error);
         })
         .finally(() => {
             mysql.end(conn);

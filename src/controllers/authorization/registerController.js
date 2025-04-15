@@ -39,12 +39,8 @@ const postRegisterController = (req, res, next, config) => {
 			next(result)
         })
         .catch((err) => {
-            if (err.code === 'ER_DUP_ENTRY') {
-                const error = error409();
-                return sendResponseConflict(res, error);
-            }
             const error = errorHandler(err, config.environment);
-            return res.status(err).json(error);
+            res.status(error.code).json(error);
         })
         .finally(() => {
             mysql.end(conn);
