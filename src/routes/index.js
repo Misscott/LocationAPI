@@ -684,15 +684,15 @@ export default(config) => {
 
     //roles_has_permissions routes
     /**
-     * @name GET/roles_has_permissions
+     * @name GET/roles/:role_uuid/permissions
      * @function
      * @inner
-     * @memberof placeRouter
-     * @route GET /roles_has_permissions
+     * @memberof deviceRouter
+     * @route GET /roles/:role_uuid/permissions
      * @group Roles Permissions - Operations about roles permissions
-     * @param {string} uuid.path.required - The unique identifier for the role permission
+     * @param {string} uuid.path.optional - The unique identifier for the role permission
      * @param {string} fk_role.path.required - The unique identifier for the role
-     * @param {string} fk_permission.path.required - The unique identifier for the permission
+     * @param {string} fk_permission.path.optional - The unique identifier for the permission
      * @returns {SuccessResponse} 200 - The role permission object
      * @returns {ErrorResponse} 404 - Role permission not found
      * @returns {ErrorResponse} 422 - Unprocessable entity
@@ -700,13 +700,14 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.get(
-        '/roles_has_permissions',
+        '/roles/:role_uuid/permissions',
         (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/roles_has_permissions')(req, res, next, config),
+        (req, res, next) => authorizePermission('/roles/:role_uuid/permissions')(req, res, next, config),
         [
             uuid('uuid').optional({ nullable: false, values: 'falsy' }),
-            uuid('fk_role').optional({ nullable: false, values: 'falsy' }),
-            uuid('fk_permission').optional({ nullable: false, values: 'falsy' })
+            uuid('role_uuid'),
+            uuid('permission_uuid').optional({ nullable: false, values: 'falsy' }),
+            varChar('roleName').optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getRolesHasPermissionsController(req, res, next, config),
@@ -715,13 +716,13 @@ export default(config) => {
     );
 
     /**
-     * @name GET/roles_has_permissions/:uuid
+     * @name GET/roles/:role_uuid/permissions/:permission_uuid'
      * @function
      * @inner
-     * @memberof placeRouter
-     * @route GET /roles_has_permissions/{uuid}
+     * @memberof deviceRouter
+     * @route GET /roles/:role_uuid/permissions/:permission_uuid
      * @group Roles Permissions - Operations about roles permissions
-     * @param {string} uuid.path.required - The unique identifier for the role permission
+     * @param {string} uuid.path.optional - The unique identifier for the role permission
      * @param {string} fk_role.path.required - The unique identifier for the role
      * @param {string} fk_permission.path.required - The unique identifier for the permission
      * @returns {SuccessResponse} 200 - The role permission object
@@ -731,26 +732,27 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.get(
-        '/roles_has_permissions/:uuid',
+        '/roles/:role_uuid/permissions/:permission_uuid',
         (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/roles_has_permissions/:uuid')(req, res, next, config),
+        (req, res, next) => authorizePermission('/roles/:role_uuid/permissions/:permission_uuid')(req, res, next, config),
         [
-            uuid('uuid'),
-            uuid('fk_role').optional({ nullable: false, values: 'falsy' }),
-            uuid('fk_permission').optional({ nullable: false, values: 'falsy' })
+            uuid('uuid').optional({nullable:false, values:'falsy'}),
+            uuid('role_uuid'),
+            uuid('permission_uuid'),
+            varChar('roleName').optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
-        (req, res, next) => getRolesHasPermissionsByUuidController(req, res, next, config),
+        (req, res, next) => getRolesHasPermissionsController(req, res, next, config),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
         (result, req, res, _) => sendOkResponse(result, req, res)
     );
 
     /**
-     * @name POST/roles_has_permissions
+     * @name POST/roles/:role_uuid/permissions
      * @function
      * @inner
-     * @memberof placeRouter
-     * @route POST /roles_has_permissions
+     * @memberof deviceRouter
+     * @route POST /roles/:role_uuid/permissions'
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} fk_role.path.required - The unique identifier for the role
      * @param {string} fk_permission.path.required - The unique identifier for the permission
@@ -762,12 +764,12 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.post(
-        '/roles_has_permissions',
+        '/roles/:role_uuid/permissions',
         (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/roles_has_permissions')(req, res, next, config),
+        (req, res, next) => authorizePermission('/roles/:role_uuid/permissions')(req, res, next, config),
         [
-            uuid('fk_role'),
-            uuid('fk_permission')
+            uuid('role_uuid'),
+            uuid('permission_uuid')
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => postRolesHasPermissionsController(req, res, next, config),
@@ -776,13 +778,12 @@ export default(config) => {
     );
 
     /**
-     * @name PUT/roles_has_permissions/:uuid
+     * @name PUT/roles/:role_uuid/permissions/:permission_uuid'
      * @function
      * @inner
-     * @memberof placeRouter
-     * @route PUT /roles_has_permissions/{uuid}
+     * @memberof deviceRouter
+     * @route PUT /roles/:role_uuid/permissions/:permission_uuid'
      * @group Roles Permissions - Operations about roles permissions
-     * @param {string} uuid.path.required - The unique identifier for the role permission
      * @param {string} fk_role.path.required - The unique identifier for the role
      * @param {string} fk_permission.path.required - The unique identifier for the permission
      * @returns {SuccessResponse} 200 - Role permission updated successfully
@@ -793,13 +794,14 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.put(
-        '/roles_has_permissions/:uuid',
+        '/roles/:role_uuid/permissions/:permission_uuid',
         (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/roles_has_permissions/:uuid')(req, res, next, config),
+        (req, res, next) => authorizePermission('/roles/:role_uuid/permissions/:permission_uuid')(req, res, next, config),
         [
-            uuid('uuid'),
-            uuid('fk_role').optional({ nullable: false, values: 'falsy' }),
-            uuid('fk_permission').optional({ nullable: false, values: 'falsy' })
+            uuid('role_uuid'),
+            uuid('permission_uuid'),
+            uuid('new_role_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('new_permission_uuid').optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => putRolesHasPermissionsController(req, res, next, config),
@@ -808,11 +810,11 @@ export default(config) => {
     );
 
     /**
-     * @name DELETE/roles_has_permissions/:uuid
+     * @name DELETE/roles/:role_uuid/permissions
      * @function
      * @inner
-     * @memberof placeRouter
-     * @route DELETE /roles_has_permissions/{uuid}
+     * @memberof deviceRouter
+     * @route DELETE /roles/:role_uuid/permissions
      * @group Roles Permissions - Operations about roles permissions
      * @param {string} uuid.path.required - The unique identifier for the role permission
      * @param {string} fk_role.path.required - The unique identifier for the role
@@ -824,11 +826,41 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.delete(
-        '/roles_has_permissions/:uuid',
+        '/roles/:role_uuid/permissions',
         (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/roles_has_permissions/:uuid')(req, res, next, config),
+        (req, res, next) => authorizePermission('/roles/:role_uuid/permissions')(req, res, next, config),
         [
-            uuid('uuid')
+            uuid('role_uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => softDeleteRolesHasPermissionsController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    /**
+     * @name DELETE/roles/:role_uuid/permissions/permission_uuid
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route DELETE /roles/:role_uuid/permissions/permission_uuid
+     * @group Roles Permissions - Operations about roles permissions
+     * @param {string} uuid.path.required - The unique identifier for the role permission
+     * @param {string} fk_role.path.required - The unique identifier for the role
+     * @param {string} fk_permission.path.required - The unique identifier for the permission
+     * @returns {SuccessResponse} 200 - Role permission deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Role permission not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.delete(
+        '/roles/:role_uuid/permissions/permission_uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/roles/:role_uuid/permissions/permission_uuid')(req, res, next, config),
+        [
+            uuid('role_uuid'),
+            uuid('permission_uuid')
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => softDeleteRolesHasPermissionsController(req, res, next, config),
