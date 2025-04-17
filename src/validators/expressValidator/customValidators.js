@@ -5,11 +5,22 @@ const integer = field => check(field).isInt({min: Number.MIN_SAFE_INTEGER, max: 
 const integerRange = (field, { min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER } = {}) => check(field).isInt({min, max}).withMessage(`|${field}| must be an integer between ${min} and ${max}`)
 const uuid = field => check(field).isUUID('all').withMessage(`|${field}| must be a valid UUID`)
 const bigInt = field => check(field).isBigInt().withMessage(`|${field}| must be a valid BigInt`)
+const longitudeRange = (field, { min = -180, max = 180 } = {}) => 
+	check(field)
+	  .isFloat({ min, max })
+	  .withMessage(`|${field}| must be a number between ${min} and ${max}`)
+  
+  const latitudeRange = (field, { min = -90, max = 90 } = {}) => 
+	check(field)
+	  .isFloat({ min, max })
+	  .withMessage(`|${field}| must be a number between ${min} and ${max}`)
 
 export {
 	integer,
 	integerRange,
 	uuid,
 	varChar,
-	bigInt
+	bigInt,
+	latitudeRange,
+	longitudeRange
 }

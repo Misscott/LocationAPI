@@ -15,7 +15,7 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { integer, uuid, varChar } from '../validators/expressValidator/customValidators.js'
+import { integer, latitudeRange, longitudeRange, uuid, varChar } from '../validators/expressValidator/customValidators.js'
 import { integerRange } from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
@@ -896,7 +896,8 @@ export default(config) => {
             varChar('name').optional({ nullable: false, values: 'falsy' }),
             varChar('address').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
-            uuid('fk_coordinate').optional({ nullable: false, values: 'falsy' }),
+            latitudeRange('latitude').optional({ nullable: false, values: 'falsy' }),
+            longitudeRange('longitude').optional({nullable: false, values: 'falsy'})
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getPlaceListController(req, res, next, config),
@@ -931,7 +932,8 @@ export default(config) => {
             varChar('name').optional({ nullable: false, values: 'falsy' }),
             varChar('address').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
-            uuid('fk_coordinate').optional({ nullable: false, values: 'falsy' }),
+            latitudeRange('latitude').optional({ nullable: false, values: 'falsy' }),
+            longitudeRange('longitude').optional({nullable: false, values: 'falsy'})
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getPlaceByUuidController(req, res, next, config),
@@ -964,7 +966,8 @@ export default(config) => {
             varChar('name'),
             varChar('address').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
-            uuid('fk_coordinate')
+            latitudeRange('latitude'),
+            longitudeRange('longitude')
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => insertPlaceController(req, res, next, config),
@@ -999,7 +1002,8 @@ export default(config) => {
             varChar('name').optional({ nullable: false, values: 'falsy' }),
             varChar('address').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
-            uuid('fk_coordinate').optional({ nullable: false, values: 'falsy' }),
+            latitudeRange('latitude').optional({ nullable: false, values: 'falsy' }),
+            longitudeRange('longitude').optional({nullable: false, values: 'falsy'})
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => modifyPlaceController(req, res, next, config),
