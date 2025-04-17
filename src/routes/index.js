@@ -879,7 +879,9 @@ export default(config) => {
      * @param {string} uuid.path.required - The unique identifier for the place
      * @param {string} name.path.required - The name of the place
      * @param {string} address.path.required - The address of the place
-     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @param {string} latitude.path.required - The latitude of the place
+     * @param {string} longitude.path.required - The longitude of the place
+     * @param {string} description.path.optional - The description of the place
      * @returns {SuccessResponse} 200 - The place object
      * @returns {ErrorResponse} 404 - Place not found
      * @returns {ErrorResponse} 422 - Unprocessable entity
@@ -915,7 +917,9 @@ export default(config) => {
      * @param {string} uuid.path.required - The unique identifier for the place
      * @param {string} name.path.required - The name of the place
      * @param {string} address.path.required - The address of the place
-     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @param {string} latitude.path.required - The latitude of the place
+     * @param {string} longitude.path.required - The longitude of the place
+     * @param {string} description.path.optional - The description of the place
      * @returns {SuccessResponse} 200 - The place object
      * @returns {ErrorResponse} 404 - Place not found
      * @returns {ErrorResponse} 422 - Unprocessable entity
@@ -950,7 +954,9 @@ export default(config) => {
      * @group Places - Operations about places
      * @param {string} name.path.required - The name of the place
      * @param {string} address.path.required - The address of the place
-     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @param {string} description.path.required - The description of the place
+     * @param {string} latitude.path.required - The latitude of the place
+     * @param {string} longitude.path.required - The longitude of the place
      * @returns {SuccessResponse} 200 - Place created successfully
      * @returns {ErrorResponse} 400 - Bad request
      * @returns {ErrorResponse} 404 - Place not found
@@ -985,7 +991,9 @@ export default(config) => {
      * @param {string} uuid.path.required - The unique identifier for the place
      * @param {string} name.path.required - The name of the place
      * @param {string} address.path.required - The address of the place
-     * @param {string} fk_coordinate.path.required - The unique identifier for the coordinate
+     * @param {string} latitude.path.required - The latitude of the place
+     * @param {string} longitude.path.required - The longitude of the place
+     * @param {string} description.path.optional - The description of the place
      * @returns {SuccessResponse} 200 - Place updated successfully
      * @returns {ErrorResponse} 400 - Bad request
      * @returns {ErrorResponse} 404 - Place not found
@@ -1034,159 +1042,6 @@ export default(config) => {
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => deletePlaceController(req, res, next, config),
-        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res, _) => sendResponseNoContent(result, req, res)
-    );
-
-    // Coordinates Routes
-    /**
-     * @name GET/coordinates
-     * @function
-     * @inner
-     * @memberof placeRouter
-     * @route GET /coordinates
-     * @group Coordinates - Operations about coordinates
-     * @param {string} uuid.path.required - The unique identifier for the coordinate
-     * @param {string} latitude.path.required - The latitude of the coordinate
-     * @param {string} longitude.path.required - The longitude of the coordinate
-     * @returns {SuccessResponse} 200 - The coordinate object
-     * @returns {ErrorResponse} 404 - Coordinate not found
-     * @returns {ErrorResponse} 422 - Unprocessable entity
-     * @returns {ErrorResponse} 500 - Internal server error
-     * @returns {ErrorResponse} 403 - Forbidden
-    */
-    routes.get(
-        '/coordinates',
-        (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/coordinates')(req, res, next, config),
-        [
-            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
-            varChar('latitude').optional({ nullable: false, values: 'falsy' }),
-            varChar('longitude').optional({ nullable: false, values: 'falsy' }),
-        ],
-        (req, res, next) => payloadExpressValidator(req, res, next, config),
-        (req, res, next) => getCoordinatesListController(req, res, next, config),
-        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res, _) => sendOkResponse(result, req, res)
-    );
-
-    /**
-     * @name GET/coordinates/:uuid
-     * @function
-     * @inner
-     * @memberof placeRouter
-     * @route GET /coordinates/{uuid}
-     * @group Coordinates - Operations about coordinates
-     * @param {string} uuid.path.required - The unique identifier for the coordinate
-     * @param {string} latitude.path.required - The latitude of the coordinate
-     * @param {string} longitude.path.required - The longitude of the coordinate
-     * @returns {SuccessResponse} 200 - The coordinate object
-     * @returns {ErrorResponse} 404 - Coordinate not found
-     * @returns {ErrorResponse} 422 - Unprocessable entity
-     * @returns {ErrorResponse} 500 - Internal server error
-     * @returns {ErrorResponse} 403 - Forbidden
-    */
-    routes.get(
-        '/coordinates/:uuid',
-        (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/coordinates/:uuid')(req, res, next, config),
-        [
-            uuid('uuid'),
-            varChar('latitude').optional({ nullable: false, values: 'falsy' }),
-            varChar('longitude').optional({ nullable: false, values: 'falsy' }),
-        ],
-        (req, res, next) => payloadExpressValidator(req, res, next, config),
-        (req, res, next) => getCoordinatesByUuidController(req, res, next, config),
-        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res, _) => sendOkResponse(result, req, res)
-    );
-
-    /**
-     * @name POST/coordinates
-     * @function
-     * @inner
-     * @memberof placeRouter
-     * @route POST /coordinates
-     * @group Coordinates - Operations about coordinates
-     * @param {string} latitude.path.required - The latitude of the coordinate
-     * @param {string} longitude.path.required - The longitude of the coordinate
-     * @returns {SuccessResponse} 200 - Coordinate created successfully
-     * @returns {ErrorResponse} 400 - Bad request
-     * @returns {ErrorResponse} 404 - Coordinate not found
-     * @returns {ErrorResponse} 422 - Unprocessable entity
-     * @returns {ErrorResponse} 500 - Internal server error
-     * @returns {ErrorResponse} 403 - Forbidden
-    */
-    routes.post(
-        '/coordinates',
-        (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/coordinates')(req, res, next, config),
-        [
-            varChar('latitude'),
-            varChar('longitude')
-        ],
-        (req, res, next) => payloadExpressValidator(req, res, next, config),
-        (req, res, next) => postCoordinatesController(req, res, next, config),
-        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res, _) => sendCreatedResponse(result, req, res)
-    );
-
-    /**
-     * @name PUT/coordinates/:uuid
-     * @function
-     * @inner
-     * @memberof placeRouter
-     * @route PUT /coordinates/{uuid}
-     * @group Coordinates - Operations about coordinates
-     * @param {string} uuid.path.required - The unique identifier for the coordinate
-     * @param {string} latitude.path.required - The latitude of the coordinate
-     * @param {string} longitude.path.required - The longitude of the coordinate
-     * @returns {SuccessResponse} 200 - Coordinate updated successfully
-     * @returns {ErrorResponse} 400 - Bad request
-     * @returns {ErrorResponse} 404 - Coordinate not found
-     * @returns {ErrorResponse} 422 - Unprocessable entity
-     * @returns {ErrorResponse} 500 - Internal server error
-     * @returns {ErrorResponse} 403 - Forbidden
-    */
-    routes.put(
-        '/coordinates/:uuid',
-        (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/coordinates/:uuid')(req, res, next, config),
-        [
-            uuid('uuid'),
-            varChar('latitude').optional({ nullable: false, values: 'falsy' }),
-            varChar('longitude').optional({ nullable: false, values: 'falsy' }),
-        ],
-        (req, res, next) => payloadExpressValidator(req, res, next, config),
-        (req, res, next) => putCoordinatesController(req, res, next, config),
-        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res, _) => sendCreatedResponse(result, req, res)
-    );
-
-    /**
-     * @name DELETE/coordinates/:uuid
-     * @function
-     * @inner
-     * @memberof placeRouter
-     * @route DELETE /coordinates/{uuid}
-     * @group Coordinates - Operations about coordinates
-     * @param {string} uuid.path.required - The unique identifier for the coordinate
-     * @returns {SuccessResponse} 200 - Coordinate deleted successfully. No content
-     * @returns {ErrorResponse} 404 - Coordinate not found  
-     * @returns {ErrorResponse} 422 - Unprocessable entity
-     * @returns {ErrorResponse} 500 - Internal server error
-     * @returns {ErrorResponse} 403 - Forbidden
-     * @returns {ErrorResponse} 401 - Unauthorized
-    */
-    routes.delete(
-        '/coordinates/:uuid',
-        (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/coordinates/:uuid')(req, res, next, config),
-        [
-            uuid('uuid')
-        ],
-        (req, res, next) => payloadExpressValidator(req, res, next, config),
-        (req, res, next) => deleteCoordinatesController(req, res, next, config),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
         (result, req, res, _) => sendResponseNoContent(result, req, res)
     );

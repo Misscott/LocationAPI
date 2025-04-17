@@ -12,11 +12,10 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
             p.name,
             p.description,
             p.address,
-            c.latitude,
-            c.longitude,
+            p.latitude,
+            p.longitude,
             p.created`}
         FROM dbmaster.places AS p
-        JOIN dbmaster.coordinates AS c ON p.fk_coordinate = c.id
         WHERE p.deleted IS NULL
         AND p.created <= :now
         AND (p.deleted > :now OR p.deleted IS NULL)
@@ -46,7 +45,8 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
             name,
             description,
             address,
-            fk_coordinates,
+            longitude,
+            latitude
             created,
             createdBy
         )
@@ -55,7 +55,8 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
             :name,
             ${descriptionCondition},
             ${addressCondition},
-            (SELECT id FROM dbmaster.coordinates WHERE latitude = :latitude AND longitude = :longitude),
+            :longitude
+            :latitude,
             :now,
             ${createdByCondition}
         )
@@ -66,7 +67,8 @@ const updatePlaceQuery = ({ name, description, address, latitude, longitude }) =
     const nameCondition = name ? 'name = :name,' : '';
     const descriptionCondition = description ? 'description = :description,' : '';
     const addressCondition = address ? 'address = :address' : '';
-    const fk_coordinateCondition = latitude && longitude ? 'fk_coordinate = (SELECT id FROM dbmaster.coordinates WHERE latitude = :latitude AND longitude = :longitude),' : '';
+    const longitudeCondition = longitude ? 'longitude = :longitude' : '';
+    const latitudeCondition = latitude ? 'latitude = :latitude' : '';
 
     return `
         UPDATE dbmaster.places AS p
@@ -74,7 +76,8 @@ const updatePlaceQuery = ({ name, description, address, latitude, longitude }) =
             ${nameCondition}
             ${descriptionCondition}
             ${addressCondition}
-            ${fk_coordinateCondition}
+            ${longitudeCondition}
+            ${latitudeCondition}
         WHERE 
             p.uuid = :uuid
         AND p.deleted IS NULL   
