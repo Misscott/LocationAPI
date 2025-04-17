@@ -5,7 +5,8 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
     const nameCondition = name ? `AND p.name LIKE CONCAT('%',:name,'%')` : '';
     const descriptionCondition = description ? `AND p.description LIKE CONCAT('%',:description,'%')` : '';
     const addressCondition = address ? `AND p.address LIKE CONCAT('%',:address,'%')` : '';
-    const fk_coordinateCondition = latitude && longitude ? 'AND fk_coordinate = (SELECT id FROM dbmaster.coordinates WHERE latitude = :latitude AND longitude = :longitude)' : '';
+    const latitudeCondition = latitude ? `AND p.latitude = :latitude` : '';
+    const longitudeCondition = longitude ? `AND p.longitude = :longitude` : '';
     return `
         SELECT ${count ||
             `p.uuid,
@@ -24,7 +25,8 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
         ${nameCondition}
         ${descriptionCondition}
         ${addressCondition}
-        ${fk_coordinateCondition}
+        ${latitudeCondition}
+        ${longitudeCondition}
         ${_pagination}
     `;
 }
