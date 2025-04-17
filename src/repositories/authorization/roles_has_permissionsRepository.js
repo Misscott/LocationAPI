@@ -59,7 +59,7 @@ const insertRolesHasPermissionsQuery = () => {
       :now,
       :createdBy
     );
-    SELECT permissions.*,
+    SELECT roles_has_permissions.*,
     permissions.uuid as permission_uuid,
     roles.uuid as role_uuid,
     roles.name as role_name
@@ -70,26 +70,39 @@ const insertRolesHasPermissionsQuery = () => {
     `
 }
 
-const modifyRolesHasPermissionsQuery = (new_role_uuid, new_permission_uuid) => {
+const modifyRolesHasPermissionsQuery = ({new_role_uuid, new_permission_uuid}) => {
   const roleUuidCondition = new_role_uuid ? 'fk_role = (SELECT id from dbmaster.roles WHERE uuid = :new_role_uuid),' : '';
+  const showNewRoleCondition = new_role_uuid ? 'AND dbmaster.roles.uuid = :new_role_uuid' : ''
   const permissionUuidCondition = new_permission_uuid ? 'fk_permission = (SELECT id from dbmaster.permissions WHERE uuid = :new_permission_uuid),' : '';
+  const showNewPermissionCondition = new_permission_uuid? 'AND dbmaster.permissions.uuid = :new_permission_uuid' : ''
   return `
     UPDATE 
         dbmaster.roles_has_permissions as roles_has_permissions
     SET 
         ${roleUuidCondition}
         ${permissionUuidCondition}
-        uuid = :uuid
+        roles_has_permissions.created = roles_has_permissions.created
     WHERE
         roles_has_permissions.fk_role = (SELECT id from dbmaster.roles WHERE uuid = :role_uuid)
         AND roles_has_permissions.fk_permission = (SELECT id from dbmaster.permissions WHERE uuid = :permission_uuid)
     AND 
         roles_has_permissions.deleted IS NULL; 
-    SELECT * FROM dbmaster.roles_has_permissions WHERE uuid = :uuid;
+        
+    SELECT rp.*,
+    permissions.uuid as permission_uuid,
+    roles.uuid as role_uuid,
+    roles.name as role_name
+    FROM dbmaster.roles_has_permissions as rp
+    LEFT JOIN dbmaster.permissions as permissions ON rp.fk_permission = permissions.id
+    LEFT JOIN dbmaster.roles as roles ON rp.fk_role = roles.id
+    WHERE 
+    true
+    ${showNewPermissionCondition}
+    ${showNewRoleCondition};
   `
 }
 
-const softDeleteRolesHasPermissionsQuery = (permission_uuid) => {
+const softDeleteRolesHasPermissionsQuery = ({permission_uuid}) => {
   const permissionUuidCondition = permission_uuid ? 'AND roles_has_permissions.fk_permission = (SELECT id from dbmaster.permissions WHERE uuid = :permission_uuid)' : '';
   return `
     UPDATE 
