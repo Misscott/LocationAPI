@@ -38,9 +38,9 @@ const countPlaceListQuery = rest =>
     _placeSelectQuery()({ count: 'COUNT(DISTINCT(p.uuid)) AS count' })(rest);
 
 const insertPlaceQuery = ({ description, address, createdBy }) => {
-    const descriptionCondition = description ? ':description' : null;
-    const addressCondition = address ? ':address' : null;
-    const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
+    const descriptionCondition = description ? ':description,' : null;
+    const addressCondition = address ? ':address,' : null;
+    const createdByCondition = createdBy ? 'createdBy = :createdBy,' : null;
     return `
         INSERT INTO dbmaster.places (
             uuid,
@@ -48,19 +48,20 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
             description,
             address,
             longitude,
-            latitude
-            created,
-            createdBy
+            latitude,
+            createdBy,
+            created
         )
         VALUES (
             :uuid,
             :name,
-            ${descriptionCondition},
-            ${addressCondition},
-            :longitude
+            ${descriptionCondition}
+            ${addressCondition}
+            :longitude,
             :latitude,
-            :now,
             ${createdByCondition}
+            :now
+            
         )
     `;
 }
@@ -68,9 +69,9 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
 const updatePlaceQuery = ({ name, description, address, latitude, longitude }) => {
     const nameCondition = name ? 'name = :name,' : '';
     const descriptionCondition = description ? 'description = :description,' : '';
-    const addressCondition = address ? 'address = :address' : '';
-    const longitudeCondition = longitude ? 'longitude = :longitude' : '';
-    const latitudeCondition = latitude ? 'latitude = :latitude' : '';
+    const addressCondition = address ? 'address = :address,' : '';
+    const longitudeCondition = longitude ? 'longitude = :longitude,' : '';
+    const latitudeCondition = latitude ? 'latitude = :latitude,' : '';
 
     return `
         UPDATE dbmaster.places AS p
@@ -80,6 +81,7 @@ const updatePlaceQuery = ({ name, description, address, latitude, longitude }) =
             ${addressCondition}
             ${longitudeCondition}
             ${latitudeCondition}
+            dbmaster.places.created = dbmaster.places.created,
         WHERE 
             p.uuid = :uuid
         AND p.deleted IS NULL   

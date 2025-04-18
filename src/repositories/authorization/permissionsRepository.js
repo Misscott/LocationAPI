@@ -55,7 +55,7 @@ const insertPermissionsQuery = (createdBy) => {
 }
 
 const modifyPermissionsQuery = (action, endpoint) => {
-  const actionCondition = action ? 'action = :action ,' : '';
+  const actionCondition = action ? 'action = :action,' : '';
   const endpointCondition = endpoint ? 'fk_endpoint = (SELECT id from dbmaster.endpoints WHERE route = :endpoint),' : '';
   return `
   UPDATE dbmaster.permissions AS permissions

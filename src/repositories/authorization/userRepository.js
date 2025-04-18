@@ -61,9 +61,9 @@ const countUserListQuery = rest =>
  * @returns {String} INSERT query
  */
 const insertUserQuery = ({email, fk_role, createdBy}) => {
-    const emailCondition = email ? ':email' : null;
-    const roleCondition = fk_role ? '(SELECT id FROM dbmaster.roles WHERE name = :fk_role)' : `(SELECT id FROM dbmaster.roles WHERE name = 'viewer')`;
-    const createdByCondition = createdBy ? ':createdBy' : null;
+    const emailCondition = email ? ':email,' : null;
+    const roleCondition = fk_role ? '(SELECT id FROM dbmaster.roles WHERE name = :fk_role),' : `(SELECT id FROM dbmaster.roles WHERE name = 'viewer'),`;
+    const createdByCondition = createdBy ? ':createdBy,' : null;
     return `
     INSERT INTO dbmaster.users (
       uuid,
@@ -71,17 +71,17 @@ const insertUserQuery = ({email, fk_role, createdBy}) => {
       password,
       email,
       fk_role,
-      created,
-      createdBy
+      createdBy,
+      created
     )
     VALUES (
       :uuid,
       :username,
       :password,
-      ${emailCondition},
-      ${roleCondition},
-      :now,
+      ${emailCondition}
+      ${roleCondition}
       ${createdByCondition}
+      :now
     );
     SELECT * FROM dbmaster.users WHERE uuid = :uuid;
     `
@@ -95,7 +95,7 @@ const modifyUserQuery = ({ username, password, email, role }) => {
   const usernameCondition = username ? `username = :username, ` : ``;
   const passwordCondition = password ? `password = :password, ` : ``;
   const emailCondition = email ? `email = :email, ` : ``;
-  const roleCondition = role ? `fk_role = (SELECT id FROM dbmaster.roles WHERE name = :role) ` : ``;
+  const roleCondition = role ? `fk_role = (SELECT id FROM dbmaster.roles WHERE name = :role),` : ``;
 
   return `
     UPDATE

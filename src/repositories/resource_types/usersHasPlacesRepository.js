@@ -43,7 +43,7 @@ const countUserHasPlacesListQuery = rest =>
 const insertUserHasPlacesQuery = ({ uuidUser, uuidPlace, createdBy, uuidReportType }) => {
     const uuidUserCondition = uuidUser ? '(SELECT id FROM dbmaster.users WHERE uuid = :uuidUser),' : null;
     const uuidPlaceCondition = uuidPlace ? '(SELECT id FROM dbmaster.places WHERE uuid = :uuidPlace),' : null;
-    const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
+    const createdByCondition = createdBy ? 'createdBy = :createdBy,' : null;
     const reportTypeCondition = uuidReportType ? '(SELECT id FROM dbmaster.report_types WHERE uuid = :reportType),' : null;
     
     return `
@@ -53,8 +53,8 @@ const insertUserHasPlacesQuery = ({ uuidUser, uuidPlace, createdBy, uuidReportTy
             fk_place,
             fk_report_type,
             rating,
-            created,
-            createdBy
+            createdBy,
+            created
         )
         VALUES (
             :uuid
@@ -62,18 +62,18 @@ const insertUserHasPlacesQuery = ({ uuidUser, uuidPlace, createdBy, uuidReportTy
             ${uuidPlaceCondition}
             ${reportTypeCondition}
             :rating,
-            :now,
             ${createdByCondition}
+            :now
         );
         SELECT * FROM dbmaster.users_has_places WHERE uuid = :uuid;
     `
 }
 
 const modifyUserHasPlacesQuery = (uuidUser, uuidPlace, uuidReportType, rating) => {
-    const uuidUserCondition = uuidUser ? 'fk_user = (SELECT id FROM dbmaster.users WHERE uuid = :uuidUser)' : ``;
-    const uuidPlaceCondition = uuidPlace ? 'fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :uuidPlace)' : ``;
-    const uuidReportTypeCondition = uuidReportType ? 'fk_report_type = (SELECT id FROM dbmaster.report_types WHERE uuid = :uuidReportType)' : ``;
-    const ratingCondition = rating ? 'rating = :rating' : ``;
+    const uuidUserCondition = uuidUser ? 'fk_user = (SELECT id FROM dbmaster.users WHERE uuid = :uuidUser),' : ``;
+    const uuidPlaceCondition = uuidPlace ? 'fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :uuidPlace),' : ``;
+    const uuidReportTypeCondition = uuidReportType ? 'fk_report_type = (SELECT id FROM dbmaster.report_types WHERE uuid = :uuidReportType),' : ``;
+    const ratingCondition = rating ? 'rating = :rating,' : ``;
     return `
         UPDATE dbmaster.users_has_places
         SET 
