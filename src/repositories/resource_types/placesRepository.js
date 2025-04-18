@@ -61,8 +61,8 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
             :latitude,
             ${createdByCondition}
             :now
-            
-        )
+        );
+        SELECT * FROM dbmaster.places WHERE uuid = :uuid;
     `;
 }
 
@@ -81,12 +81,13 @@ const updatePlaceQuery = ({ name, description, address, latitude, longitude }) =
             ${addressCondition}
             ${longitudeCondition}
             ${latitudeCondition}
-            dbmaster.places.created = dbmaster.places.created,
+            uuid = :uuid,
         WHERE 
             p.uuid = :uuid
         AND p.deleted IS NULL   
         AND p.created <= NOW()
-        AND (p.deleted > NOW() OR p.deleted IS NULL)
+        AND (p.deleted > NOW() OR p.deleted IS NULL);
+        SELECT * FROM dbmaster.places WHERE uuid = :uuid;
     `;
 }
 
