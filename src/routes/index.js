@@ -15,7 +15,7 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { integer, latitudeRange, longitudeRange, uuid, varChar } from '../validators/expressValidator/customValidators.js'
+import { latitudeRange, longitudeRange, uuid, varChar } from '../validators/expressValidator/customValidators.js'
 import { integerRange } from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
@@ -36,7 +36,6 @@ import {
     softDeleteRolesHasPermissionsController,
  } from '../controllers/authorization/roles_has_permissionsController.js'
 import { deletePlaceController, getPlaceByUuidController, getPlaceListController, insertPlaceController, modifyPlaceController } from '../controllers/resource_types/placesController.js'
-import { deleteCoordinatesController, getCoordinatesByUuidController, getCoordinatesListController, postCoordinatesController, putCoordinatesController } from '../controllers/resource_types/coordinatesController.js'
 import { deleteUserHasPlacesController, getUserHasPlacesByUuidController, getUserHasPlacesListController, postUserHasPlacesController, putUserHasPlacesController } from '../controllers/resource_types/usersHasPlacesController.js'
 import { getReportTypesByUuidController, getReportTypesListController, postReportTypesController, putReportTypesController, softDeleteReportTypesController } from '../controllers/resource_types/reportTypesController.js'
 
