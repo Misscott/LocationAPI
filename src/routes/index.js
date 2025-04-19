@@ -1071,9 +1071,9 @@ export default(config) => {
         (req, res, next) => authorizePermission('/reports')(req, res, next, config),
         [
             uuid('uuid'),
-            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            uuid('place_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
@@ -1105,9 +1105,9 @@ export default(config) => {
         (req, res, next) => authorizePermission('/reports/:uuid')(req, res, next, config),
         [
             uuid('uuid'),
-            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            uuid('place_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
@@ -1139,9 +1139,9 @@ export default(config) => {
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/reports')(req, res, next, config),
         [
-            uuid('uuidPlace'),
-            uuid('uuidUser'),
-            uuid('uuidReportType'),
+            uuid('place_uuid'),
+            uuid('user_uuid'),
+            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
         ],
@@ -1176,9 +1176,9 @@ export default(config) => {
         (req, res, next) => authorizePermission('/reports/:uuid')(req, res, next, config),
         [
             uuid('uuid'),
-            uuid('uuidPlace').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidUser').optional({ nullable: false, values: 'falsy' }),
-            uuid('uuidReportType').optional({ nullable: false, values: 'falsy' }),
+            uuid('place_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
         ],

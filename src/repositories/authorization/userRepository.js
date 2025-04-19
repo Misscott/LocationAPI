@@ -78,9 +78,9 @@ const insertUserQuery = ({email, fk_role, createdBy}) => {
       :uuid,
       :username,
       :password,
-      ${emailCondition}
+      ${emailCondition},
       ${roleCondition}
-      ${createdByCondition}
+      ${createdByCondition},
       :now
     );
     SELECT * FROM dbmaster.users WHERE uuid = :uuid;

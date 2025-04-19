@@ -38,9 +38,9 @@ const countPlaceListQuery = rest =>
     _placeSelectQuery()({ count: 'COUNT(DISTINCT(p.uuid)) AS count' })(rest);
 
 const insertPlaceQuery = ({ description, address, createdBy }) => {
-    const descriptionCondition = description ? ':description,' : null;
-    const addressCondition = address ? ':address,' : null;
-    const createdByCondition = createdBy ? 'createdBy = :createdBy,' : null;
+    const descriptionCondition = description ? ':description' : null;
+    const addressCondition = address ? ':address' : null;
+    const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
     return `
         INSERT INTO dbmaster.places (
             uuid,
@@ -55,11 +55,11 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
         VALUES (
             :uuid,
             :name,
-            ${descriptionCondition}
-            ${addressCondition}
+            ${descriptionCondition},
+            ${addressCondition},
             :longitude,
             :latitude,
-            ${createdByCondition}
+            ${createdByCondition},
             :now
         );
         SELECT * FROM dbmaster.places WHERE uuid = :uuid;
@@ -81,7 +81,7 @@ const updatePlaceQuery = ({ name, description, address, latitude, longitude }) =
             ${addressCondition}
             ${longitudeCondition}
             ${latitudeCondition}
-            uuid = :uuid,
+            uuid = :uuid
         WHERE 
             p.uuid = :uuid
         AND p.deleted IS NULL   

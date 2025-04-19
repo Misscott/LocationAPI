@@ -20,7 +20,7 @@ const getUserHasPlacesListController = (req, res, next, config) => {
     ])
         .then(([getResults, countResults]) => {
             next({
-                _data: {usersHasPlaces: getResults},
+                _data: {reports: getResults},
                 _page: {
                     totalElements: countResults,
                     limit: req.query.limit || 100,
@@ -41,7 +41,7 @@ const getUserHasPlacesByUuidController = (req, res, next, config) => {
     const uuid_user_has_places = req.params.uuid
     const conn = mysql.start(config)
 
-    getUserHasPlacesListModel({ uuid_user_has_places, conn })
+    getUserHasPlacesListModel({ uuid: uuid_user_has_places, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()
@@ -51,7 +51,7 @@ const getUserHasPlacesByUuidController = (req, res, next, config) => {
 
             const result = {
                 _data: {
-                    usersHasPlaces: response
+                    reports: response
                 }
             }
             next(result)
@@ -69,7 +69,7 @@ const getUserHasPlacesByUserUuidController = (req, res, next, config) => {
     const uuid_user = req.params.uuid
     const conn = mysql.start(config)
 
-    getUserHasPlacesListModel({ uuid_user, conn })
+    getUserHasPlacesListModel({ user_uuid: uuid_user, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()
@@ -79,7 +79,7 @@ const getUserHasPlacesByUserUuidController = (req, res, next, config) => {
 
             const result = {
                 _data: {
-                    usersHasPlaces: response
+                    reports: response
                 }
             }
             next(result)
@@ -97,7 +97,7 @@ const getUserHasPlacesByPlaceUuidController = (req, res, next, config) => {
     const uuid_place = req.params.uuid
     const conn = mysql.start(config)
 
-    getUserHasPlacesListModel({ uuid_place, conn })
+    getUserHasPlacesListModel({ place_uuid: uuid_place, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()
@@ -107,7 +107,7 @@ const getUserHasPlacesByPlaceUuidController = (req, res, next, config) => {
 
             const result = {
                 _data: {
-                    usersHasPlaces: response
+                    reports: response
                 }
             }
             next(result)
@@ -128,7 +128,7 @@ const postUserHasPlacesController = (req, res, next, config) => {
         .then((response) => {
             const result = {
                 _data: {
-                    usersHasPlaces: response
+                    reports: response
                 }
             }
             next(result)
@@ -149,7 +149,7 @@ const putUserHasPlacesController = (req, res, next, config) => {
         .then((response) => {
             const result = {
                 _data: {
-                    usersHasPlaces: response
+                    reports: response
                 }
             }
             next(result)
@@ -168,7 +168,7 @@ const deleteUserHasPlacesController = (req, res, next, config) => {
     const uuid_user_has_places = req.params.uuid
     const deleted_by = req.auth.user || null
 
-    softDeleteUserHasPlacesModel({uuid_user_has_places, deleted_by, conn})
+    softDeleteUserHasPlacesModel({uuid: uuid_user_has_places, deleted_by, conn})
         .then(() => {
             next({})
         })
@@ -186,7 +186,7 @@ const deleteUserHasPlacesByUserUuidController = (req, res, next, config) => {
     const uuid_user = req.params.uuid
     const deleted_by = req.auth.user || null
 
-    softDeleteUserHasPlacesModel({uuid_user, deleted_by, conn})
+    softDeleteUserHasPlacesModel({user_uuid: uuid_user, deleted_by, conn})
         .then(() => {
             next({})
         })
@@ -204,7 +204,7 @@ const deleteUserHasPlacesByPlaceUuidController = (req, res, next, config) => {
     const uuid_place = req.params.uuid
     const deleted_by = req.auth.user || null
 
-    softDeleteUserHasPlacesModel({uuid_place, deleted_by, conn})
+    softDeleteUserHasPlacesModel({place_uuid: uuid_place, deleted_by, conn})
         .then(() => {
             next({})
         })
