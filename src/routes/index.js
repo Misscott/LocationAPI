@@ -38,6 +38,7 @@ import {
 import { deletePlaceController, getPlaceByUuidController, getPlaceListController, insertPlaceController, modifyPlaceController } from '../controllers/resource_types/placesController.js'
 import { deleteUserHasPlacesController, getUserHasPlacesByUuidController, getUserHasPlacesListController, postUserHasPlacesController, putUserHasPlacesController } from '../controllers/resource_types/usersHasPlacesController.js'
 import { getReportTypesByUuidController, getReportTypesListController, postReportTypesController, putReportTypesController, softDeleteReportTypesController } from '../controllers/resource_types/reportTypesController.js'
+import { getFavoritesController, postFavoritesController, putFavoritesController, softDeleteFavoritesController } from '../controllers/resource_types/favoritesController.js'
 
 /**
  * @function default 
@@ -1357,6 +1358,202 @@ export default(config) => {
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => softDeleteReportTypesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    //favorite places endpoint
+    /**
+     * @name GET/users/:user:uuid/places
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route GET /users/:user:uuid/places
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} uuid.path.optional - The unique identifier for favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_place.path.optional - The unique identifier for the place
+     * @returns {SuccessResponse} 200 - The favorite object
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.get(
+        '/users/:user:uuid/places',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user:uuid/places')(req, res, next, config),
+        [
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('user_uuid'),
+            uuid('place_uuid').optional({ nullable: false, values: 'falsy' })
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getFavoritesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name GET/users/:user_uuid/places/:place_uuid'
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route GET /users/:user_uuid/places/:place_uuid
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} uuid.path.optional - The unique identifier for favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @returns {SuccessResponse} 200 - The favorite object
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 409 - Conflict
+    */
+    routes.get(
+        '/users/:user_uuid/places/:place_uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/places/:place_uuid')(req, res, next, config),
+        [
+            uuid('uuid').optional({nullable:false, values:'falsy'}),
+            uuid('user_uuid'),
+            uuid('place_uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getFavoritesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendOkResponse(result, req, res)
+    );
+
+    /**
+     * @name POST/users/:user_uuid/places
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route POST /users/:user_uuid/places'
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @returns {SuccessResponse} 200 - Favorite place created successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 409 - Conflict
+    */
+    routes.post(
+        '/users/:user_uuid/places',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/places')(req, res, next, config),
+        [
+            uuid('user_uuid'),
+            uuid('place_uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => postFavoritesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name PUT/users/:user_uuid/places/:place_uuid'
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route PUT /users/:user_uuid/places/:place_uuid'
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @param {string} new_user_uuid.path.optional - The unique identifier for the new user
+     * @param {string} new_place_uuid.path.optional - The unique identifier for the new place
+     * @returns {SuccessResponse} 200 - Favorite place updated successfully
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 409 - Conflict
+    */
+    routes.put(
+        '/users/:user_uuid/places/:place_uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/places/:place_uuid')(req, res, next, config),
+        [
+            uuid('user_uuid'),
+            uuid('place_uuid'),
+            uuid('new_user_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('new_place_uuid').optional({ nullable: false, values: 'falsy' })
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => putFavoritesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
+    );
+
+    /**
+     * @name DELETE/users/:user_uuid/places'
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route DELETE /users/:user_uuid/places
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @returns {SuccessResponse} 200 - Favorite place deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 409 - Conflict
+    */
+    routes.delete(
+        '/users/:user_uuid/places',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/places')(req, res, next, config),
+        [
+            uuid('user_uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => softDeleteFavoritesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    /**
+     * @name DELETE/users/:user_uuid/places/:place_uuid'
+     * @function
+     * @inner
+     * @memberof deviceRouter
+     * @route DELETE /users/:user_uuid/places/:place_uuid
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @returns {SuccessResponse} 200 - Favorite place deleted successfully. No content
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+     * @returns {ErrorResponse} 400 - Bad request
+     * @returns {ErrorResponse} 409 - Conflict
+    */
+    routes.delete(
+        '/users/:user_uuid/places/:place_uuid',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/places/:place_uuid')(req, res, next, config),
+        [
+            uuid('user_uuid'),
+            uuid('place_uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => softDeleteFavoritesController(req, res, next, config),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
         (result, req, res, _) => sendResponseNoContent(result, req, res)
     );
