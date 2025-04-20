@@ -14,7 +14,7 @@ const _favoritesQuery = (_pagination = '') => ({count}) => ({uuid, place_uuid, u
             place.address as place_address,
             place.latitude as place_latitude,
             place.longitude as place_longitude,
-            place.description as place_description
+            place.description as place_description,
             p.username as user_username`}
       FROM
         dbmaster.favorites as r
