@@ -1380,9 +1380,9 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.get(
-        '/users/:user:uuid/places',
+        '/users/:user_uuid/places',
         (req, res, next) => authenticateToken(req, res, next, config),
-        (req, res, next) => authorizePermission('/users/:user:uuid/places')(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/places')(req, res, next, config),
         [
             uuid('uuid').optional({ nullable: false, values: 'falsy' }),
             uuid('user_uuid'),
