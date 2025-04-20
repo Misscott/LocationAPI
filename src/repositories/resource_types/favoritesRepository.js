@@ -9,9 +9,13 @@ const _favoritesQuery = (_pagination = '') => ({count}) => ({uuid, place_uuid, u
         ${count || 
             `r.*, 
             place.uuid as place_uuid, 
-            p.action as permission_action, 
             p.uuid as user_uuid, 
-            p.fk_endpoint as permission_endpoint`}
+            place.name as place_name,
+            place.address as place_address,
+            place.latitude as place_latitude,
+            place.longitude as place_longitude,
+            place.description as place_description
+            p.username as user_username`}
       FROM
         dbmaster.favorites as r
       JOIN 
@@ -56,7 +60,7 @@ const insertFavoritesQuery = () => {
       :now,
       :createdBy
     );
-    SELECT favorites.*,
+    SELECT f.*,
     users.uuid as user_uuid,
     places.uuid as place_uuid,
     places.name as role_name
