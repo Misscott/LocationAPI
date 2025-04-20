@@ -166,9 +166,9 @@ const putUserHasPlacesController = (req, res, next, config) => {
 const deleteUserHasPlacesController = (req, res, next, config) => {
     const conn = mysql.start(config)
     const uuid_user_has_places = req.params.uuid
-    const deleted_by = req.auth.user || null
+    const deletedBy = req.auth.user || null
 
-    softDeleteUserHasPlacesModel({uuid: uuid_user_has_places, deleted_by, conn})
+    softDeleteUserHasPlacesModel({uuid: uuid_user_has_places, deletedBy, conn})
         .then(() => {
             next({})
         })
@@ -184,9 +184,9 @@ const deleteUserHasPlacesController = (req, res, next, config) => {
 const deleteUserHasPlacesByUserUuidController = (req, res, next, config) => {
     const conn = mysql.start(config)
     const uuid_user = req.params.uuid
-    const deleted_by = req.auth.user || null
+    const deletedBy = req.auth.user || null
 
-    softDeleteUserHasPlacesModel({user_uuid: uuid_user, deleted_by, conn})
+    softDeleteUserHasPlacesModel({user_uuid: uuid_user, deletedBy, conn})
         .then(() => {
             next({})
         })
@@ -202,9 +202,9 @@ const deleteUserHasPlacesByUserUuidController = (req, res, next, config) => {
 const deleteUserHasPlacesByPlaceUuidController = (req, res, next, config) => {
     const conn = mysql.start(config)
     const uuid_place = req.params.uuid
-    const deleted_by = req.auth.user || null
+    const deletedBy = req.auth.user || null
 
-    softDeleteUserHasPlacesModel({place_uuid: uuid_place, deleted_by, conn})
+    softDeleteUserHasPlacesModel({place_uuid: uuid_place, deletedBy, conn})
         .then(() => {
             next({})
         })

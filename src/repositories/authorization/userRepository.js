@@ -61,9 +61,9 @@ const countUserListQuery = rest =>
  * @returns {String} INSERT query
  */
 const insertUserQuery = ({email, fk_role, createdBy}) => {
-    const emailCondition = email ? ':email,' : null;
+    const emailCondition = email ? ':email' : null;
     const roleCondition = fk_role ? '(SELECT id FROM dbmaster.roles WHERE name = :fk_role),' : `(SELECT id FROM dbmaster.roles WHERE name = 'viewer'),`;
-    const createdByCondition = createdBy ? ':createdBy,' : null;
+    const createdByCondition = createdBy ? ':createdBy' : null;
     return `
     INSERT INTO dbmaster.users (
       uuid,

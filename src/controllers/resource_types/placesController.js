@@ -41,7 +41,7 @@ const getPlaceByUuidController = (req, res, next, config) => {
     const uuid_place = req.params.uuid
     const conn = mysql.start(config)
 
-    getPlaceListModel({ uuid_place, conn })
+    getPlaceListModel({ uuid: uuid_place, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()
@@ -122,11 +122,11 @@ const getPlaceByNameController = (req, res, next, config) => {
 }
 
 const getPlaceByLatLongController = (req, res, next, config) => {
-    const lat = req.params.lat
-    const long = req.params.long
+    const latitude = req.params.latitude
+    const longitude = req.params.longitude
     const conn = mysql.start(config)
 
-    getPlaceListModel({ lat, long, conn })
+    getPlaceListModel({ latitude, longitude, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()
@@ -174,7 +174,7 @@ const insertPlaceController = (req, res, next, config) => {
 const modifyPlaceController = (req, res, next, config) => {
     const conn = mysql.start(config)
 
-    modifyPlaceModel({ ...req.body, conn })
+    modifyPlaceModel({  ...req.params, ...req.body, conn })
         .then((response) => {
             const result = {
                 _data: {
@@ -195,7 +195,7 @@ const modifyPlaceController = (req, res, next, config) => {
 const deletePlaceController = (req, res, next, config) => {
     const conn = mysql.start(config)
 
-    deletePlaceModel({ ...req.body, conn })
+    deletePlaceModel({ ...req.params, ...req.body, conn })
         .then((response) => {
             const result = {
                 _data: {
