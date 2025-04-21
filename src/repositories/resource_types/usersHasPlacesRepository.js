@@ -9,7 +9,7 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
     const descriptionCondition = description ? `AND up.description LIKE CONCAT('%',:description,'%')` : '';
     
     // Conditional fields and joins for the report type
-    const reportTypeFields = report_type_uuid ? `rt.name AS report_type_name,
+    const reportTypeFields = report_type_uuid ? `, rt.name AS report_type_name,
         rt.uuid AS report_type_uuid` : '';
     
     const reportTypeJoin =  report_type_uuid ? 'LEFT JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id' : '';
