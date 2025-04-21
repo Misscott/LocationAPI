@@ -15,7 +15,7 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
     `;
     
     const reportTypeJoin = `
-        ${up.fk_report_type ? 'JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id' : ''}
+        ${up.fk_report_type ? 'LEFT JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id' : ''}
     `;
     
     const reportTypeDeletedCondition = `
@@ -30,8 +30,8 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
             p.name AS place_name,
             p.uuid AS place_uuid${reportTypeFields}`}
         FROM dbmaster.users_has_places AS up
-        JOIN dbmaster.users AS u ON up.fk_user = u.id
-        JOIN dbmaster.places AS p ON up.fk_place = p.id
+        LEFT JOIN dbmaster.users AS u ON up.fk_user = u.id
+        LEFT JOIN dbmaster.places AS p ON up.fk_place = p.id
         ${reportTypeJoin}
         WHERE up.created <= :now
         AND (up.deleted > :now OR up.deleted IS NULL)
