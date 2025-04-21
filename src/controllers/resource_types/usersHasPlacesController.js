@@ -19,19 +19,15 @@ const getUserHasPlacesListController = (req, res, next, config) => {
         countUserHasPlacesListModel({...req.query, ...req.body, ...req.params, conn})
     ])
         .then(([getResults, countResults]) => {
-            if (noResults(response)) {
-                const err = error404()
-                const error = errorHandler(err, config.environment)
-                return sendResponseNotFound(res, error)
-            }
-            next({
+            const results = {
                 _data: {reports: getResults},
                 _page: {
                     totalElements: countResults,
                     limit: req.query.limit || 100,
                     page: req.query.page || (countResults && 1) || 0
                 }
-            })
+            }
+            next(results)
         })
         .catch((err) => {
             const error = errorHandler(err, config.environment)
