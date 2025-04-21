@@ -22,7 +22,8 @@ const getReportTypesListQuery = ({ limit, page, ...rest }) =>
 const countReportTypesListQuery = rest =>
     _coordinatesSelectQuery()({ count: 'COUNT(DISTINCT(rt.uuid)) AS count' })(rest);
 
-const insertReportTypesQuery = () => {
+const insertReportTypesQuery = (createdBy) => {
+    const createdByCondition = createdBy ? ', :createdBy' : null;
     return `
         INSERT INTO dbmaster.report_types (
             uuid,
@@ -33,8 +34,8 @@ const insertReportTypesQuery = () => {
         VALUES (
             :uuid,
             :name,
-            :now,
-            :createdBy
+            :now
+            ${createdByCondition}
         );
         SELECT * FROM dbmaster.report_types WHERE uuid = :uuid;
     `
