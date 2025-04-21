@@ -19,6 +19,7 @@ const getUserHasPlacesListController = (req, res, next, config) => {
         countUserHasPlacesListModel({...req.query, conn})
     ])
         .then(([getResults, countResults]) => {
+            console.log('getResults', getResults)
             next({
                 _data: {reports: getResults},
                 _page: {
