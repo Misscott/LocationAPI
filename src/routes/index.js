@@ -1151,7 +1151,7 @@ export default(config) => {
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => getUserHasPlacesListController(req, res, next, config),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res) => sendOkResponse(result, req, res)
+        (result, req, res, _) => sendOkResponse(result, req, res)
     );
 
   /**
@@ -1188,17 +1188,11 @@ export default(config) => {
             varChar('description').optional({ nullable: true, values: 'falsy' })
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
-        // Interceptamos el parámetro y lo pasamos como query para reutilizar el mismo controlador
-        (req, res, next) => {
-          req.query.place_uuid = req.params.place_uuid;
-          next();
-        },
         (req, res, next) => getUserHasPlacesListController(req, res, next, config),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
-        (result, req, res) => sendOkResponse(result, req, res)
+        (result, req, res, _) => sendOkResponse(result, req, res)
     );
   
-
     /**
      * @name POST/reports
      * @function
