@@ -1,5 +1,5 @@
 import { pagination } from "../../utils/pagination.js";
-//reports repository
+
 const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, user_uuid, place_uuid, report_type_uuid, rating }) => {
     const uuidCondition = uuid ? 'AND up.uuid = :uuid ' : '';
     const user_uuidCondition = user_uuid ? 'AND up.fk_user = (SELECT id FROM dbmaster.users WHERE uuid = :user_uuid)' : '';
@@ -8,19 +8,12 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
     const ratingCondition = rating ? 'AND up.rating = :rating' : '';
     
     // Conditional fields and joins for the report type
-    const reportTypeFields = `
-        ${count ? '' : `,
-        rt.name AS report_type_name,
-        rt.uuid AS report_type_uuid`}
-    `;
+    const reportTypeFields = report_type_uuid ? `rt.name AS report_type_name,
+        rt.uuid AS report_type_uuid` : '';
     
-    const reportTypeJoin = `
-        ${up.fk_report_type ? 'LEFT JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id' : ''}
-    `;
+    const reportTypeJoin =  report_type_uuid ? 'LEFT JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id' : '';
     
-    const reportTypeDeletedCondition = `
-        ${up.fk_report_type ? 'AND rt.deleted IS NULL' : ''}
-    `;
+    const reportTypeDeletedCondition = report_type_uuid ? 'AND rt.deleted IS NULL' : '';
     
     return `
         SELECT ${count ||
