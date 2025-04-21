@@ -15,7 +15,7 @@ const getUserHasPlacesListController = (req, res, next, config) => {
     const conn = mysql.start(config)
 
     Promise.all([
-        getUserHasPlacesListModel({...req.query, conn}),
+        getUserHasPlacesListModel({...req.query, ...req.body, ...req.params, conn}),
         countUserHasPlacesListModel({...req.query, conn})
     ])
         .then(([getResults, countResults]) => {
@@ -41,7 +41,7 @@ const getUserHasPlacesByUuidController = (req, res, next, config) => {
     const uuid_user_has_places = req.params.uuid
     const conn = mysql.start(config)
 
-    getUserHasPlacesListModel({ uuid: uuid_user_has_places, conn })
+    getUserHasPlacesListModel({ uuid: uuid_user_has_places, ...req.params, ...req.body, conn })
         .then((response) => {
             if (noResults(response)) {
                 const err = error404()

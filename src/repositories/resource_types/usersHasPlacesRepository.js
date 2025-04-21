@@ -45,7 +45,8 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdB
     const place_uuidCondition = place_uuid ? '(SELECT id FROM dbmaster.places WHERE uuid = :place_uuid)' : null;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
     const descriptionCondition = description ? 'description = :description' : null;
-    const reportTypeCondition = report_type_uuid ? '(SELECT id FROM dbmaster.report_types WHERE uuid = :reportType)' : null;
+    const reportTypeCondition = report_type_uuid ? `(SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid)` : null;
+
     
     return `
         INSERT INTO dbmaster.users_has_places (

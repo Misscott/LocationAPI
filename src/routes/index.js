@@ -1117,6 +1117,89 @@ export default(config) => {
     );
 
     /**
+     * @name GET/users/:user_uuid/reports
+     * @function
+     * @inner
+     * @memberof placeRouter
+     * @route GET /users/:user_uuid/reports
+     * @group Reports - Operations about reports
+     * @param {string} uuid.path.optional - The unique identifier for the report
+     * @param {string} fk_place.path.optional - The unique identifier for the place
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_report_type.path.optional - The unique identifier for the report type
+     * @param {string} rating.path.optional - The rating of the report
+     * @param {string} description.path.optional - The description of the report
+     * @returns {SuccessResponse} 200 - The report object
+     * @returns {ErrorResponse} 404 - Report not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+     * @returns {ErrorResponse} 401 - Unauthorized
+    */
+    routes.get(
+        '/users/:user_uuid/reports',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/users/:user_uuid/reports')(req, res, next, config),
+        [
+            uuid('user_uuid'),
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('place_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
+            integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' })
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => getUserHasPlacesListController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res) => sendOkResponse(result, req, res)
+    );
+
+  /**
+   * @name GET/places/:place_uuid/reports
+   * @function
+   * @inner
+   * @memberof placeRouter
+   * @route GET /places/:place_uuid/reports
+   * @group Reports - Operations about reports
+   * @param {string} uuid.path.optional - The unique identifier for the report
+   * @param {string} fk_place.path.required - The unique identifier for the place
+   * @param {string} fk_user.path.optional - The unique identifier for the user
+   * @param {string} fk_report_type.path.optional - The unique identifier for the report type
+   * @param {string} rating.path.optional - The rating of the report
+   * @param {string} description.path.optional - The description of the report
+   * @returns {SuccessResponse} 200 - The report object
+   * @returns {ErrorResponse} 404 - Report not found
+   * @returns {ErrorResponse} 422 - Unprocessable entity
+   * @returns {ErrorResponse} 500 - Internal server error
+   * @returns {ErrorResponse} 403 - Forbidden
+   * @returns {ErrorResponse} 401 - Unauthorized
+   * @returns {ErrorResponse} 400 - Bad request
+   */
+    routes.get(
+        '/places/:place_uuid/reports',
+        (req, res, next) => authenticateToken(req, res, next, config),
+        (req, res, next) => authorizePermission('/places/:place_uuid/reports')(req, res, next, config),
+        [
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('place_uuid'),
+            uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
+            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
+            integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' }),
+            varChar('description').optional({ nullable: true, values: 'falsy' })
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        // Interceptamos el parámetro y lo pasamos como query para reutilizar el mismo controlador
+        (req, res, next) => {
+          req.query.place_uuid = req.params.place_uuid;
+          next();
+        },
+        (req, res, next) => getUserHasPlacesListController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res) => sendOkResponse(result, req, res)
+    );
+  
+
+    /**
      * @name POST/reports
      * @function
      * @inner
