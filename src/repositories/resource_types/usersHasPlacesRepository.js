@@ -40,10 +40,11 @@ const getUserHasPlacesListQuery = ({ limit, page, ...rest }) =>
 const countUserHasPlacesListQuery = rest =>
     _userHasPlacesSelectQuery()({ count: 'COUNT(DISTINCT(up.uuid)) AS count' })(rest);
 
-const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, createdBy, report_type_uuid }) => {
+const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdBy, report_type_uuid }) => {
     const user_uuidCondition = user_uuid ? '(SELECT id FROM dbmaster.users WHERE uuid = :user_uuid)' : null;
     const place_uuidCondition = place_uuid ? '(SELECT id FROM dbmaster.places WHERE uuid = :place_uuid)' : null;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
+    const descriptionCondition = description ? 'description = :description' : null;
     const reportTypeCondition = report_type_uuid ? '(SELECT id FROM dbmaster.report_types WHERE uuid = :reportType)' : null;
     
     return `
@@ -53,6 +54,7 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, createdBy, report_typ
             fk_place,
             fk_report_type,
             rating,
+            description,
             createdBy,
             created
         )
@@ -62,6 +64,7 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, createdBy, report_typ
             ${place_uuidCondition},
             ${reportTypeCondition},
             :rating,
+            ${descriptionCondition},
             ${createdByCondition},
             :now
         );
