@@ -1,11 +1,12 @@
 import { pagination } from "../../utils/pagination.js";
 
-const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, user_uuid, place_uuid, report_type_uuid, rating }) => {
+const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, user_uuid, place_uuid, report_type_uuid, rating, description }) => {
     const uuidCondition = uuid ? 'AND up.uuid = :uuid ' : '';
     const user_uuidCondition = user_uuid ? 'AND up.fk_user = (SELECT id FROM dbmaster.users WHERE uuid = :user_uuid)' : '';
     const place_uuidCondition = place_uuid ? 'AND up.fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :place_uuid)' : '';
     const report_type_uuidCondition = report_type_uuid ? 'AND up.fk_report_type = (SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid)' : '';
     const ratingCondition = rating ? 'AND up.rating = :rating' : '';
+    const descriptionCondition = description ? `AND up.description LIKE CONCAT('%',:description,'%')` : '';
     
     // Conditional fields and joins for the report type
     const reportTypeFields = report_type_uuid ? `rt.name AS report_type_name,
@@ -36,6 +37,7 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
         ${place_uuidCondition}
         ${report_type_uuidCondition}
         ${ratingCondition}
+        ${descriptionCondition}
         ${_pagination}
     `;
 }

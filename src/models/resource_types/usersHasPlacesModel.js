@@ -10,7 +10,7 @@ const getUserHasPlacesListModel = ({conn, ...rest}) => {
     const paramsToSearch = {...rest, now}
     return mysql
         .execute(getUserHasPlacesListQuery(paramsToSearch), conn, paramsToSearch)
-        .then(queryResult => queryResult.map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered))
+        .then(queryResult => queryResult.map(({id, fk_user, fk_place, fk_report_type, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered))
 }
 
 const countUserHasPlacesListModel = ({conn, ...rest}) => {
