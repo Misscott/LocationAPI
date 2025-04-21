@@ -1070,7 +1070,7 @@ export default(config) => {
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/reports')(req, res, next, config),
         [
-            uuid('uuid'),
+            uuid('uuid').optional({ nullable: false, values: 'falsy' }),
             uuid('place_uuid').optional({ nullable: false, values: 'falsy' }),
             uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
             uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),

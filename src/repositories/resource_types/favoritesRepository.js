@@ -1,6 +1,6 @@
 import { pagination } from '../../utils/pagination.js'
 
-const _favoritesQuery = (_pagination = '') => ({count}) => ({uuid, place_uuid, user_uuid, roleName}) => {
+const _favoritesQuery = (_pagination = '') => ({count}) => ({uuid, place_uuid, user_uuid}) => {
     const uuidCondition = uuid ? 'AND r.uuid = :uuid' : '';
     const placeUuidCondition = place_uuid ? 'AND fk_place = (SELECT id from dbmaster.places WHERE uuid = :place_uuid)' : '';
     const userUuidCondition = user_uuid ? 'AND fk_user = (SELECT id from dbmaster.users WHERE uuid = :user_uuid)' : '';
@@ -63,7 +63,7 @@ const insertFavoritesQuery = () => {
     SELECT f.*,
     users.uuid as user_uuid,
     places.uuid as place_uuid,
-    places.name as role_name
+    places.name as place_name
     FROM dbmaster.favorites as f
     LEFT JOIN dbmaster.users as users ON f.fk_user = users.id
     LEFT JOIN dbmaster.places as places ON f.fk_place = places.id
