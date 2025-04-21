@@ -80,7 +80,12 @@ const getPlaceByAddressController = (req, res, next, config) => {
             const result = {
                 _data: {
                     places: response
-                }
+                },
+                _page: {
+					totalElements: countResults,
+					limit: req.query.limit || 100,
+					page: req.query.page || (countResults && 1) || 0
+				}
             }
             next(result)
         })

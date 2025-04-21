@@ -16,10 +16,14 @@ const getUserHasPlacesListController = (req, res, next, config) => {
 
     Promise.all([
         getUserHasPlacesListModel({...req.query, ...req.body, ...req.params, conn}),
-        countUserHasPlacesListModel({...req.query, conn})
+        countUserHasPlacesListModel({...req.query, ...req.body, ...req.params, conn})
     ])
         .then(([getResults, countResults]) => {
-            console.log('getResults', getResults)
+            if (noResults(response)) {
+                const err = error404()
+                const error = errorHandler(err, config.environment)
+                return sendResponseNotFound(res, error)
+            }
             next({
                 _data: {reports: getResults},
                 _page: {
