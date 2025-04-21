@@ -6,25 +6,38 @@ const _userHasPlacesSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, 
     const place_uuidCondition = place_uuid ? 'AND up.fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :place_uuid)' : '';
     const report_type_uuidCondition = report_type_uuid ? 'AND up.fk_report_type = (SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid)' : '';
     const ratingCondition = rating ? 'AND up.rating = :rating' : '';
+    
+    // Conditional fields and joins for the report type
+    const reportTypeFields = `
+        ${count ? '' : `,
+        rt.name AS report_type_name,
+        rt.uuid AS report_type_uuid`}
+    `;
+    
+    const reportTypeJoin = `
+        ${up.fk_report_type ? 'JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id' : ''}
+    `;
+    
+    const reportTypeDeletedCondition = `
+        ${up.fk_report_type ? 'AND rt.deleted IS NULL' : ''}
+    `;
+    
     return `
         SELECT ${count ||
             `up.*,
             u.username AS user_username,
             u.uuid AS user_uuid,
             p.name AS place_name,
-            p.uuid AS place_uuid,
-            rt.name AS report_type_name,
-            rt.uuid AS report_type_uuid`}
+            p.uuid AS place_uuid${reportTypeFields}`}
         FROM dbmaster.users_has_places AS up
         JOIN dbmaster.users AS u ON up.fk_user = u.id
         JOIN dbmaster.places AS p ON up.fk_place = p.id
-        JOIN dbmaster.report_types AS rt ON up.fk_report_type = rt.id
+        ${reportTypeJoin}
         WHERE up.created <= :now
         AND (up.deleted > :now OR up.deleted IS NULL)
         AND u.deleted IS NULL
         AND p.deleted IS NULL
-        AND rt.deleted IS NULL
-        AND true
+        ${reportTypeDeletedCondition}
         ${uuidCondition}
         ${user_uuidCondition}
         ${place_uuidCondition}
@@ -43,8 +56,8 @@ const countUserHasPlacesListQuery = rest =>
 const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdBy, report_type_uuid }) => {
     const user_uuidCondition = user_uuid ? '(SELECT id FROM dbmaster.users WHERE uuid = :user_uuid)' : null;
     const place_uuidCondition = place_uuid ? '(SELECT id FROM dbmaster.places WHERE uuid = :place_uuid)' : null;
-    const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
-    const descriptionCondition = description ? 'description = :description' : null;
+    const createdByCondition = createdBy ? ':createdBy' : null;
+    const descriptionCondition = description ? ':description' : null;
     const reportTypeCondition = report_type_uuid ? `(SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid)` : null;
 
     
