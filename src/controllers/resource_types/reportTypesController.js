@@ -67,9 +67,9 @@ const getReportTypesByUuidController = (req, res, next, config) => {
 
 const postReportTypesController = (req, res, next, config) => {
     const conn = mysql.start(config);
-    const created_by = req.auth.user || null
+    const createdBy = req.auth.user || null
 
-    insertReportTypesModel({ ...req.body, created_by, conn })
+    insertReportTypesModel({ ...req.body, createdBy, conn })
         .then((response) => {
             const result = {
                 _data: {
@@ -112,9 +112,9 @@ const putReportTypesController = (req, res, next, config) => {
 const softDeleteReportTypesController = (req, res, next, config) => {
     const conn = mysql.start(config);
     const uuid_report_type = req.params.uuid;
-    const deleted_by = req.auth.user || null
+    const deletedBy = req.auth.user || null
 
-    softDeleteReportTypesModel({ uuid: uuid_report_type, deleted_by, conn })
+    softDeleteReportTypesModel({ uuid: uuid_report_type, deletedBy, conn })
         .then(() => {
             const result = {}
             next(result);
