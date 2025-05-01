@@ -81,7 +81,7 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdB
     `
 }
 
-const modifyUserHasPlacesQuery = (user_uuid, place_uuid, report_type_uuid, rating) => {
+const modifyUserHasPlacesQuery = ({user_uuid, place_uuid, report_type_uuid, rating}) => {
     const user_uuidCondition = user_uuid ? 'fk_user = (SELECT id FROM dbmaster.users WHERE uuid = :user_uuid),' : ``;
     const place_uuidCondition = place_uuid ? 'fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :place_uuid),' : ``;
     const report_type_uuidCondition = report_type_uuid ? 'fk_report_type = (SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid),' : ``;
