@@ -146,7 +146,7 @@ const postUserHasPlacesController = (req, res, next, config) => {
 const putUserHasPlacesController = (req, res, next, config) => {
     const conn = mysql.start(config)
 
-    modifyUserHasPlacesModel({...req.body, conn})
+    modifyUserHasPlacesModel({...req.body, ...req.params, conn})
         .then((response) => {
             const result = {
                 _data: {
