@@ -179,7 +179,7 @@ export default(config) => {
             varChar('username'),
             varChar('password'),
             varChar('email').optional({ nullable: true, values: 'falsy' }),
-            varChar('fk_role').optional({ nullable: false, values: 'falsy' })
+            uuid('role').optional({ nullable: false, values: 'falsy' })
 
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
@@ -216,7 +216,8 @@ export default(config) => {
             uuid('uuid'),
             varChar('username').optional({ nullable: false, values: 'falsy' }),
             varChar('email').optional({ nullable: true, values: 'falsy' }),
-            uuid('fk_role').optional({ nullable: false, values: 'falsy' })
+            uuid('role').optional({ nullable: false, values: 'falsy' }),
+            varChar('roleName').optional({ nullable: false, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => putUserController(req, res, next, config),

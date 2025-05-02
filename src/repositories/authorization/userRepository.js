@@ -60,9 +60,9 @@ const countUserListQuery = rest =>
  * Insert query using parameters passed in request
  * @returns {String} INSERT query
  */
-const insertUserQuery = ({email, fk_role, createdBy}) => {
+const insertUserQuery = ({email, role, createdBy}) => {
     const emailCondition = email ? ':email' : null;
-    const roleCondition = fk_role ? '(SELECT id FROM dbmaster.roles WHERE name = :fk_role),' : `(SELECT id FROM dbmaster.roles WHERE name = 'viewer'),`;
+    const roleCondition = role ? '(SELECT id FROM dbmaster.roles WHERE uuid = :role),' : `(SELECT id FROM dbmaster.roles WHERE name = 'viewer'),`;
     const createdByCondition = createdBy ? ':createdBy' : null;
     return `
     INSERT INTO dbmaster.users (
@@ -91,11 +91,12 @@ const insertUserQuery = ({email, fk_role, createdBy}) => {
  * @param {Object} params All params involved in query to be modified in certain object matching uuid passed as req param
  * @returns {String} UPDATE query
  */
-const modifyUserQuery = ({ username, password, email, role }) => {
+const modifyUserQuery = ({ username, password, email, role, roleName }) => {
   const usernameCondition = username ? `username = :username, ` : ``;
   const passwordCondition = password ? `password = :password, ` : ``;
   const emailCondition = email ? `email = :email, ` : ``;
-  const roleCondition = role ? `fk_role = (SELECT id FROM dbmaster.roles WHERE name = :role),` : ``;
+  const roleCondition = role ? `fk_role = (SELECT id FROM dbmaster.roles WHERE uuid = :role),` : ``;
+  const roleNameCondition = roleName ? `fk_role = (SELECT id FROM dbmaster.roles WHERE name = :roleName),` : ``;
 
   return `
     UPDATE
@@ -105,6 +106,7 @@ const modifyUserQuery = ({ username, password, email, role }) => {
       ${passwordCondition}
       ${emailCondition}
       ${roleCondition}
+      ${roleNameCondition}
       uuid = :uuid
     WHERE
       users.uuid = :uuid
