@@ -10,10 +10,15 @@ const longitudeRange = (field, { min = -180, max = 180 } = {}) =>
 	  .isFloat({ min, max })
 	  .withMessage(`|${field}| must be a number between ${min} and ${max}`)
   
-  const latitudeRange = (field, { min = -90, max = 90 } = {}) => 
+const latitudeRange = (field, { min = -90, max = 90 } = {}) => 
 	check(field)
 	  .isFloat({ min, max })
 	  .withMessage(`|${field}| must be a number between ${min} and ${max}`)
+
+const json = (field) => 
+	check(field)
+	  .isJSON()
+	  .withMessage(`|${field}| must be a valid JSON string`);
 
 export {
 	integer,
@@ -22,5 +27,6 @@ export {
 	varChar,
 	bigInt,
 	latitudeRange,
-	longitudeRange
+	longitudeRange,
+	json
 }
