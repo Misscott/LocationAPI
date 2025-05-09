@@ -9,15 +9,21 @@ import config from './config/index.js'
 import routes from './routes/index.js'
 import { error404, errorHandler } from './utils/errors.js'
 import { getRoutes } from './utils/links.js'
-/*import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import { dirname } from 'node:path'
 
 const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)*/
+const __dirname = dirname(__filename)
 
 const app = express()
 dayjs.extend(utc)
 const { NODE_ENV } = process.env
+
+/*//Verify that upload directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!file.existsSync(uploadsDir)) {
+    file.mkdirSync(uploadsDir, { recursive: true });
+}*/
 
 /**
  * MIDDLEWARE------------------------------------------
@@ -36,7 +42,7 @@ app.use(express.urlencoded({extended: false}));
 
 app.use((req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*')
-	res.header('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE')
+	res.header('Access-Control-Allow-Methods', 'GET,PATCH,PUT,POST,DELETE')
 	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Client-Version')
 	next()
 })
@@ -48,6 +54,8 @@ const links1 = getRoutes({ prefix: '', routes: r1.stack })
 const linkRoutes = { ...links1 }
 
 app.use('/', r1)
+
+app.use('/public', express.static(path.join(__dirname, 'uploads')));
 
 // APPLICATION LAUNCHER ------------------------------------------------------------------
 // 404 - Not found
@@ -66,9 +74,14 @@ app.use((req, res) => {
 
 const port = config.port || 3000
 
-const server = (NODE_ENV === 'development' ? app : https.createServer(httpsOptions(), app)).listen(port, () => {
+const server = app.listen(port, () => {
 	//eslint-disable-next-line no-console
 	console.log(`Server listening on port ${port}`)
 })
+
+/*const server = (NODE_ENV === 'development' ? app : https.createServer(httpsOptions(), app)).listen(port, () => {
+	//eslint-disable-next-line no-console
+	console.log(`Server listening on port ${port}`)
+})*/
 
 export { app, linkRoutes, server }

@@ -15,6 +15,7 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
             p.address,
             p.latitude,
             p.longitude,
+            p.images
             p.created`}
         FROM dbmaster.places AS p
         WHERE p.deleted IS NULL
@@ -37,10 +38,11 @@ const getPlaceListQuery = ({ limit, page, ...rest }) =>
 const countPlaceListQuery = rest =>
     _placeSelectQuery()({ count: 'COUNT(DISTINCT(p.uuid)) AS count' })(rest);
 
-const insertPlaceQuery = ({ description, address, createdBy }) => {
+const insertPlaceQuery = ({ description, address, createdBy, images }) => {
     const descriptionCondition = description ? ':description' : null;
     const addressCondition = address ? ':address' : null;
     const createdByCondition = createdBy ? 'createdBy = :createdBy' : null;
+    const imagesCondition = images ? ':images' : null;
     return `
         INSERT INTO dbmaster.places (
             uuid,
@@ -49,6 +51,7 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
             address,
             longitude,
             latitude,
+            images,
             createdBy,
             created
         )
@@ -59,6 +62,7 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
             ${addressCondition},
             :longitude,
             :latitude,
+            ${imagesCondition},
             ${createdByCondition},
             :now
         );
@@ -66,12 +70,13 @@ const insertPlaceQuery = ({ description, address, createdBy }) => {
     `;
 }
 
-const updatePlaceQuery = ({ name, description, address, latitude, longitude }) => {
+const updatePlaceQuery = ({ name, description, address, latitude, longitude, images }) => {
     const nameCondition = name ? 'name = :name,' : '';
     const descriptionCondition = description ? 'description = :description,' : '';
     const addressCondition = address ? 'address = :address,' : '';
     const longitudeCondition = longitude ? 'longitude = :longitude,' : '';
     const latitudeCondition = latitude ? 'latitude = :latitude,' : '';
+    const imagesCondition = images ? `images = :images,` : '';
 
     return `
         UPDATE dbmaster.places AS p
@@ -81,6 +86,7 @@ const updatePlaceQuery = ({ name, description, address, latitude, longitude }) =
             ${addressCondition}
             ${longitudeCondition}
             ${latitudeCondition}
+            ${imagesCondition}
             uuid = :uuid
         WHERE 
             p.uuid = :uuid

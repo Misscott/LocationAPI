@@ -54,7 +54,7 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdB
     const createdByCondition = createdBy ? ':createdBy' : null;
     const descriptionCondition = description ? ':description' : null;
     const reportTypeCondition = report_type_uuid ? `(SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid)` : null;
-
+    const imagesCondition = images ? ':images' : null;
     
     return `
         INSERT INTO dbmaster.users_has_places (
@@ -63,6 +63,7 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdB
             fk_place,
             fk_report_type,
             rating,
+            images,
             description,
             createdBy,
             created
@@ -73,6 +74,7 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdB
             ${place_uuidCondition},
             ${reportTypeCondition},
             :rating,
+            ${imagesCondition},
             ${descriptionCondition},
             ${createdByCondition},
             :now
@@ -86,6 +88,7 @@ const modifyUserHasPlacesQuery = ({user_uuid, place_uuid, report_type_uuid, rati
     const place_uuidCondition = place_uuid ? 'fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :place_uuid),' : ``;
     const report_type_uuidCondition = report_type_uuid ? 'fk_report_type = (SELECT id FROM dbmaster.report_types WHERE uuid = :report_type_uuid),' : ``;
     const ratingCondition = rating ? 'rating = :rating,' : ``;
+    const imagesCondition = images ? `images = :images,` : '';
     return `
         UPDATE dbmaster.users_has_places
         SET 
@@ -93,6 +96,7 @@ const modifyUserHasPlacesQuery = ({user_uuid, place_uuid, report_type_uuid, rati
             ${place_uuidCondition}
             ${report_type_uuidCondition}
             ${ratingCondition}
+            ${imagesCondition}
             uuid = :uuid
         WHERE
             users_has_places.uuid = :uuid
