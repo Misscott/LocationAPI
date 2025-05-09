@@ -15,7 +15,7 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { latitudeRange, longitudeRange, uuid, varChar } from '../validators/expressValidator/customValidators.js'
+import { json, latitudeRange, longitudeRange, uuid, varChar } from '../validators/expressValidator/customValidators.js'
 import { integerRange } from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
@@ -86,8 +86,8 @@ export default(config) => {
         (req, res, next) => indexController(req, res, next),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
         (result, req, res, _) => sendOkResponse(result, req, res)
-    )
-
+    );
+    
     // User Routes
     /**
      * @name get/users
@@ -974,7 +974,8 @@ export default(config) => {
             varChar('address').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
             latitudeRange('latitude'),
-            longitudeRange('longitude')
+            longitudeRange('longitude'),
+            json('images').optional({ nullable: true, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => insertPlaceController(req, res, next, config),
@@ -1012,7 +1013,8 @@ export default(config) => {
             varChar('address').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
             latitudeRange('latitude').optional({ nullable: false, values: 'falsy' }),
-            longitudeRange('longitude').optional({nullable: false, values: 'falsy'})
+            longitudeRange('longitude').optional({nullable: false, values: 'falsy'}),
+            json('images').optional({ nullable: true, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
         (req, res, next) => modifyPlaceController(req, res, next, config),
@@ -1221,6 +1223,7 @@ export default(config) => {
             uuid('user_uuid'),
             uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}),
+            json('images').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
@@ -1258,6 +1261,7 @@ export default(config) => {
             uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
             uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' }),
+            json('images').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
         ],
         (req, res, next) => payloadExpressValidator(req, res, next, config),
