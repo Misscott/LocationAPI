@@ -5,6 +5,7 @@ import { error404, errorHandler } from '../utils/errors.js';
 import { noResults } from '../validators/result-validators.js';
 import mysql from '../adapters/mysql.js';
 
+
 const obtainToken = (req, res) => {
     return new Promise((resolve, reject) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -23,7 +24,7 @@ const setToken = (result, req, res, next, config) => {
 	next({ user: { ...result, accessToken, refreshToken} })
 }
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = (req, res, next, config) => {
     obtainToken(req, res)
         .then((token) => getDataFromToken(token))
         .then((decoded) => {
@@ -31,21 +32,25 @@ const authenticateToken = (req, res, next) => {
             next();
         })
         .catch((error) => {
-            return sendResponseUnauthorized(res, error);
+            const err = errorHandler(error, config.environment)
+            res.status(err.code).json(err)
         });
 };
 
 const refreshAuthenticate = (req, res, next) => {
     const token = req.body.refreshToken
-    getDataFromToken(token)
+    getDataFromToken(token, 'refresh')
         .then((decoded) => {
             req.auth = decoded;
             next();
         })
         .catch((error) => {
+            if (error.code === 'TOKEN_TYPE_MISMATCH') {
+                return sendResponseForbidden(res, error);  // 403 Forbidden
+            }
             return sendResponseUnauthorized(res, error);
         });
-  }
+}
 
 const authorizePermission = (endpoint) => {
     return (req, res, next, config) => {
@@ -53,7 +58,7 @@ const authorizePermission = (endpoint) => {
             .then((token) => getDataFromToken(token)) //extract user data from the token
             .then((decoded) => {
                 const roleName = decoded.role
-                _getRolePermissionsByName(roleName, config)
+                _getRolePermissionsByName(res, roleName, config)
                     .then((rolePermissions) => {
                         const action = req.method
                         //check if the user has the necessary permissions
@@ -77,22 +82,17 @@ const authorizePermission = (endpoint) => {
     };
 };
 
-const _getRolePermissionsByName = (roleName, config) => {
+const _getRolePermissionsByName = (res, roleName, config) => {
     const conn = mysql.start(config)
     return getRolesHasPermissionsModel({ roleName, conn })
         .then((response) => {
-            if (noResults(response)) {
-                const err = error404()
-                const error = errorHandler(err, config.environment)
-                return sendResponseNotFound(response, error)
-            }
             return response.map(({ permission_action, permission_endpoint }) => ({
                 permission_action,
                 permission_endpoint
             }))
         })
-        .catch((err) => {
-            errorHandler(err, config.environment)
+        .catch((err) =>{
+            throw err
         })
         .finally(() => {
             mysql.end(conn)

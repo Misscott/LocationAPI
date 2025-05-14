@@ -13,11 +13,19 @@ dotenv.config();
  * @param {string} token - The JWT token to verify.
  * @returns {Promise<Object>} - Resolves with the decoded token payload.
 */
-const getDataFromToken = (token) => {
+const getDataFromToken = (token, expectedType = 'access') => {
   return new Promise((resolve, reject) => {
     const JWT_SECRET = process.env.JWT_SECRET;
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
-      err ? reject(err) : resolve(decoded);
+      if (err) {
+        reject(err);
+      } else if (decoded.type !== expectedType) {
+        const err = error403()
+        const error = errorHandler(err)
+        reject(error);
+      } else {
+        resolve(decoded);
+      }
     });
   });
 };
@@ -70,25 +78,13 @@ const checkPermission = (action, endpoint, userPermissions, config) => {
       }
       return { hasPermission: false };
     })
-    .catch((error) => {
-      const err = error403()
-      return errorHandler(err, config.environment,`Authorization failed: ${error.message}`);
-    });
 };
 
 const _getEndpointByRoute = (route, config) => {
   const conn = mysql.start(config)
   return getEndpointsModel({ route, conn }) 
     .then((endpointInformation) => {
-      if (noResults(endpointInformation)) {
-        const err = error404()
-        errorHandler(err, config.environment)
-      }
-
       return endpointInformation[0]
-    })
-    .catch((err) => {
-      errorHandler(err, config.environment)
     })
     .finally(() => {
       mysql.end(conn)
