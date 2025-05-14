@@ -1,6 +1,6 @@
 import { linkRoutes2 } from '../index.js';
-import { uploadMiddleware } from '../middlewares/upload.js'; // tu middleware multer
 import { Router } from 'express'
+import { uploadMiddleware } from '../middlewares/upload.js';
 
 export default(config) => {
     /**
