@@ -26,5 +26,6 @@ export default(config) => {
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes2),
         (result, req, res, _) => sendOkResponse(result, req, res)
     )
-
+    
+    return router
 }
