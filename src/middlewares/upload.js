@@ -61,13 +61,13 @@ const uploadMiddleware = (fieldName, multiple = false) => (req, res, next) => {
 
   uploader(req, res, (err) => {
     if (err instanceof multer.MulterError) {
-      res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     } else if (err) {
-      res.status(500).json({ error: 'Internal server error during file upload.' });
+      return res.status(500).json({ error: 'Internal server error during file upload.' });
     }
 
     if (!multiple && !req.file) {
-      res.status(400).json({ error: `No file uploaded under field "${fieldName}"` });
+      return res.status(400).json({ error: `No file uploaded under field "${fieldName}"` });
     }
     const result = req.file
 
