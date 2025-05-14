@@ -11,7 +11,7 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const userPath = req.body?.path || ''; //optional path from request body
+    const userPath = req.body?.path || ''; // optional path from request body
     
     const normalizedUserPath = path.normalize(userPath).replace(/^(\.\.[\/\\])+/, '');
   
@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
       return cb(new Error('Invalid path.'));
     }
   
-    // Crea el directorio si no existe
+    // Create directory if it doesn't exist
     if (!fs.existsSync(targetPath)) {
       fs.mkdirSync(targetPath, { recursive: true });
     }
@@ -46,33 +46,16 @@ const fileFilter = (req, file, cb) => {
   if (extname && mimetype) {
     cb(null, true);
   } else {
-    cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    cb(new Error(`File type not allowed: ${file.originalname}`));
   }
 };
 
-const multerUpload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 1024 * 1024 * 1024 }  // 1GB
-});
-
-const uploadMiddleware = (fieldName, multiple = false) => (req, res, next) => {
-  const uploader = multiple ? multerUpload.array(fieldName) : multerUpload.single(fieldName);
-
-  uploader(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      return res.status(400).json({ error: err.message });
-    } else if (err) {
-      return res.status(500).json({ error: 'Internal server error during file upload.' });
-    }
-
-    if (!multiple && !req.file) {
-      return res.status(400).json({ error: `No file uploaded under field "${fieldName}"` });
-    }
-    const result = req.file
-
-    next(result);
-  });
+const uploadMiddleware = (fieldName, multiple = false) => {
+  const uploader = multiple 
+    ? multer({ storage, fileFilter, limits: { fileSize: 1024 * 1024 * 10 } }).array(fieldName) // 10MB limit
+    : multer({ storage, fileFilter, limits: { fileSize: 1024 * 1024 * 10 } }).single(fieldName);
+  
+  return uploader;
 };
 
 export {
