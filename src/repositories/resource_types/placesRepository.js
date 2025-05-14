@@ -15,7 +15,7 @@ const _placeSelectQuery = (_pagination = '') => ({ count }) => ({ uuid, name, de
             p.address,
             p.latitude,
             p.longitude,
-            p.images
+            p.images,
             p.created`}
         FROM dbmaster.places AS p
         WHERE p.deleted IS NULL
