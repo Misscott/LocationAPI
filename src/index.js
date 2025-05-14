@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc.js'
 import express from 'express'
 import config from './config/index.js'
 import routes from './routes/index.js'
+import router from './routes/uploadRoutes.js'
 import { error404, errorHandler } from './utils/errors.js'
 import { getRoutes } from './utils/links.js'
 import { fileURLToPath } from 'node:url'
@@ -49,11 +50,15 @@ app.use((req, res, next) => {
 
 // ROUTES --------------------------------------------------------------------------------
 const r1 = routes(config)
+const r2 = router(config)
+
 
 const links1 = getRoutes({ prefix: '', routes: r1.stack })
 const linkRoutes = { ...links1 }
+const links2 = getRoutes({ prefix: '', routes: r2.stack })
+const linkRoutes2 = { ...links2 }
 
-app.use('/', r1)
+app.use('/', r1, r2)
 
 app.use('/public', express.static(path.join(__dirname, 'uploads')));
 
@@ -84,4 +89,4 @@ const server = app.listen(port, () => {
 	console.log(`Server listening on port ${port}`)
 })*/
 
-export { app, linkRoutes, server }
+export { app, linkRoutes, linkRoutes2, server }
