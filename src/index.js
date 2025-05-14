@@ -10,11 +10,6 @@ import routes from './routes/index.js'
 import router from './routes/uploadRoutes.js'
 import { error404, errorHandler } from './utils/errors.js'
 import { getRoutes } from './utils/links.js'
-import { fileURLToPath } from 'node:url'
-import { dirname } from 'node:path'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 const app = express()
 dayjs.extend(utc)
@@ -60,7 +55,7 @@ const linkRoutes2 = { ...links2 }
 
 app.use('/', r1, r2)
 
-app.use('/public', express.static(path.join(__dirname, 'uploads')));
+app.use('/public', express.static(path.resolve(process.cwd(), config.uploadDir)));
 
 // APPLICATION LAUNCHER ------------------------------------------------------------------
 // 404 - Not found
