@@ -9,5 +9,6 @@ export default {
 		timezone: '+00:00',
 		decimalNumbers: true
 	},
-	saltRounds: 10
+	saltRounds: 10,
+	uploadDir: 'uploads'
 }
