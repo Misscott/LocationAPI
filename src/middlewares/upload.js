@@ -11,22 +11,23 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let userPath = req.body.path || '';
+    const userPath = req.body?.path || ''; //optional path from request body
     
-    userPath = path.normalize(userPath).replace(/^(\.\.[\/\\])+/, '');
+    const normalizedUserPath = path.normalize(userPath).replace(/^(\.\.[\/\\])+/, '');
   
-    const targetPath = path.join(uploadDir, userPath);
+    const targetPath = path.join(uploadDir, normalizedUserPath);
   
     if (!targetPath.startsWith(uploadDir)) {
       return cb(new Error('Invalid path.'));
     }
   
+    // Crea el directorio si no existe
     if (!fs.existsSync(targetPath)) {
       fs.mkdirSync(targetPath, { recursive: true });
     }
   
     cb(null, targetPath);
-  },
+  },  
   
   filename: (req, file, cb) => {
     const randomName = crypto.randomBytes(16).toString('hex');
@@ -60,13 +61,13 @@ const uploadMiddleware = (fieldName, multiple = false) => (req, res, next) => {
 
   uploader(req, res, (err) => {
     if (err instanceof multer.MulterError) {
-      return res.status(400).json({ error: err.message });
+      res.status(400).json({ error: err.message });
     } else if (err) {
-      return res.status(500).json({ error: 'Internal server error during file upload.' });
+      res.status(500).json({ error: 'Internal server error during file upload.' });
     }
 
     if (!multiple && !req.file) {
-      return res.status(400).json({ error: `No file uploaded under field "${fieldName}"` });
+      res.status(400).json({ error: `No file uploaded under field "${fieldName}"` });
     }
     const result = req.file
 
