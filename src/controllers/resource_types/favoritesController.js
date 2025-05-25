@@ -84,6 +84,26 @@ const postFavoritesController = (req, res, next, config) => {
         })
 }
 
+const restoreFavoritesController = (req, res, next, config) => {
+    const conn = mysql.start(config)
+    const user_uuid = req.auth.user || null
+
+    modifyFavoritesModel({ ...req.params, user_uuid, deleted: false, conn })
+        .then((favorites) => {
+            const result = {
+                _data: favorites
+            }
+            next(result)
+        })
+        .catch((err) => {
+            const error = errorHandler(err, config.environment)
+            res.status(error.code).json(error)
+        })
+        .finally(() => {
+            mysql.end(conn)
+        })
+}
+
 const putFavoritesController = (req, res, next, config) => {
     const conn = mysql.start(config)
 
@@ -133,4 +153,5 @@ export {
     postFavoritesController,
     softDeleteFavoritesController,
     putFavoritesController,
+    restoreFavoritesController
 }

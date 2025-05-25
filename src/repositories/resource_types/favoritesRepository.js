@@ -29,7 +29,7 @@ const _favoritesQuery = (_pagination = '') => ({count}) => ({uuid, place_uuid, u
       WHERE
         r.created <= :now
       AND
-        (r.created > :now OR r.deleted IS NULL)
+        (r.deleted > :now OR r.deleted IS NULL)
       AND
         true
         ${uuidCondition}
@@ -76,12 +76,14 @@ const modifyFavoritesQuery = ({new_place_uuid, new_user_uuid}) => {
   const showNewPlaceCondition = new_place_uuid ? 'AND dbmaster.places.uuid = :new_place_uuid' : ''
   const userUuidCondition = new_user_uuid ? 'fk_user = (SELECT id from dbmaster.users WHERE uuid = :new_user_uuid),' : '';
   const showNewUserCondition = new_user_uuid? 'AND dbmaster.users.uuid = :new_user_uuid' : ''
+  const deletedCondition = deleted == false ? 'deleted = NULL,' : 'deleted = :deleted,';
   return `
     UPDATE 
         dbmaster.favorites as favorites
     SET 
         ${placeUuidCondition}
         ${userUuidCondition}
+        ${deletedCondition}
         favorites.created = favorites.created
     WHERE
         favorites.fk_place = (SELECT id from dbmaster.places WHERE uuid = :place_uuid)
