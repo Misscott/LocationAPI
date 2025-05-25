@@ -15,7 +15,7 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { json, latitudeRange, longitudeRange, uuid, validators, varChar } from '../validators/expressValidator/customValidators.js'
+import { arrayOf, json, latitudeRange, longitudeRange, uuid, validators, varChar } from '../validators/expressValidator/customValidators.js'
 import { integerRange } from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
