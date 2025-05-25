@@ -18,7 +18,23 @@ const latitudeRange = (field, { min = -90, max = 90 } = {}) =>
 const json = (field) => 
 	check(field)
 	  .isJSON()
-	  .withMessage(`|${field}| must be a valid JSON string`);
+	  .withMessage(`|${field}| must be a valid JSON string`)
+
+const isUUID = str => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+
+const arrayOf = (field, validator, errorMessage) => {	  return check(field).isArray().withMessage(`|${field}| must be an array`)		  .custom(arr => arr.every(validator))		  .withMessage(errorMessage || `|${field}| contains invalid items`);
+};
+
+const validators = {	  
+	string: item => typeof item === 'string',	  
+	number: item => typeof item === 'number',	  
+	boolean: item => typeof item === 'boolean',	  
+	uuid: item => typeof item === 'string' && isUUID(item),	  
+	email: item => typeof item === 'string' && /\S+@\S+\.\S+/.test(item),	  
+	url: item => typeof item === 'string' && /^https?:\/\/.+/.test(item),	  
+	positive: item => typeof item === 'number' && item > 0,	  
+	nonEmpty: item => typeof item === 'string' && item.trim().length > 0
+};	 
 
 export {
 	integer,
@@ -28,5 +44,7 @@ export {
 	bigInt,
 	latitudeRange,
 	longitudeRange,
-	json
+	json,
+	validators,
+	arrayOf
 }

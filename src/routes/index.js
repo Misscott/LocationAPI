@@ -15,7 +15,7 @@ import {
 	sendOkResponse,
     sendResponseNoContent,
 } from '../utils/responses.js'
-import { json, latitudeRange, longitudeRange, uuid, varChar } from '../validators/expressValidator/customValidators.js'
+import { json, latitudeRange, longitudeRange, uuid, validators, varChar } from '../validators/expressValidator/customValidators.js'
 import { integerRange } from '../validators/expressValidator/customValidators.js'
 import {payloadExpressValidator} from '../validators/expressValidator/payloadExpressValidator.js'
 import { authorizePermission, setToken, authenticateToken, refreshAuthenticate} from '../middlewares/auth.js'
@@ -38,7 +38,7 @@ import {
 import { deletePlaceController, getPlaceByUuidController, getPlaceListController, insertPlaceController, modifyPlaceController } from '../controllers/resource_types/placesController.js'
 import { deleteUserHasPlacesController, getUserHasPlacesByUuidController, getUserHasPlacesListController, postUserHasPlacesController, putUserHasPlacesController } from '../controllers/resource_types/usersHasPlacesController.js'
 import { getReportTypesByUuidController, getReportTypesListController, postReportTypesController, putReportTypesController, softDeleteReportTypesController } from '../controllers/resource_types/reportTypesController.js'
-import { getFavoritesController, postFavoritesController, putFavoritesController, softDeleteFavoritesController } from '../controllers/resource_types/favoritesController.js'
+import { getFavoritesController, postFavoritesController, putFavoritesController, restoreFavoritesController, softDeleteFavoritesController } from '../controllers/resource_types/favoritesController.js'
 
 /**
  * @function default 
@@ -1221,7 +1221,7 @@ export default(config) => {
         [
             uuid('place_uuid'),
             uuid('user_uuid'),
-            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
+            arrayOf('report_type_uuid', validators.uuid, 'report types should be passed as uuids').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}),
             json('images').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
@@ -1259,7 +1259,7 @@ export default(config) => {
             uuid('uuid'),
             uuid('place_uuid').optional({ nullable: false, values: 'falsy' }),
             uuid('user_uuid').optional({ nullable: false, values: 'falsy' }),
-            uuid('report_type_uuid').optional({ nullable: false, values: 'falsy' }),
+            arrayOf('report_type_uuid', validators.uuid, 'report types should be passed as uuids').optional({ nullable: false, values: 'falsy' }),
             integerRange('rating', {min: 1, max: 3}).optional({ nullable: false, values: 'falsy' }),
             json('images').optional({ nullable: true, values: 'falsy' }),
             varChar('description').optional({ nullable: true, values: 'falsy' }),
@@ -1627,7 +1627,7 @@ export default(config) => {
      * @returns {ErrorResponse} 409 - Conflict
     */
     routes.delete(
-        '/users/:user_uuid/places/:place_uuid',
+        '/users/:user_uuid/places/:place_uuid', //check - could be nice if there was a packaging for favorite (more explicit)
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/users/:user_uuid/places/:place_uuid')(req, res, next, config),
         [
@@ -1638,6 +1638,32 @@ export default(config) => {
         (req, res, next) => softDeleteFavoritesController(req, res, next, config),
         (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
         (result, req, res, _) => sendResponseNoContent(result, req, res)
+    );
+
+    /**
+     * @name POST/users/:user_uuid/favorites/places/:place_uuid/restore
+     * @function
+     * @inner
+     * @memberof deviceRouter 
+     * @route PUT /users/:user_uuid/favorites/places/:place_uuid/restore
+     * @group Favorites - Operations about favorite place from user
+     * @param {string} fk_user.path.required - The unique identifier for the user
+     * @param {string} fk_place.path.required - The unique identifier for the place
+     * @returns {SuccessResponse} 200 - Favorite place restored successfully
+     * @returns {ErrorResponse} 404 - Favorite place not found
+     * @returns {ErrorResponse} 422 - Unprocessable entity
+     * @returns {ErrorResponse} 500 - Internal server error
+     * @returns {ErrorResponse} 403 - Forbidden
+    */
+    routes.post('favorites/places/:place_uuid/restore', 
+        (req, res, next) => authenticateToken(req, res, next, config),
+        [
+            uuid('place_uuid')
+        ],
+        (req, res, next) => payloadExpressValidator(req, res, next, config),
+        (req, res, next) => restoreFavoritesController(req, res, next, config),
+        (result, req, res, next) => addLinks(result, req, res, next, hasAddLinks, linkRoutes),
+        (result, req, res, _) => sendCreatedResponse(result, req, res)
     );
 
     // Login Endpoint
