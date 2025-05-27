@@ -26,7 +26,7 @@ const insertUserHasPlacesModel = ({conn, ...params}) => {
     const uuid = uuidv4()
     return mysql
         .execute(insertUserHasPlacesQuery({...params, uuid, now}), conn, {...params, uuid, now})
-        .then(queryResult => queryResult[1].map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered))
+        .then(queryResult => queryResult[2].map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered))
 }
 
 const modifyUserHasPlacesModel = ({conn, ...params}) => {
@@ -39,7 +39,7 @@ const modifyUserHasPlacesModel = ({conn, ...params}) => {
             if (deletedItem) {
                 throw error404()
             }
-            return queryResult[1].map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered)
+            return queryResult[2].map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered)
         })
 }
 

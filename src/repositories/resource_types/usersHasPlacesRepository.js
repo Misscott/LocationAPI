@@ -112,7 +112,15 @@ const insertUserHasPlacesQuery = ({ user_uuid, place_uuid, description, createdB
 const modifyUserHasPlacesQuery = ({user_uuid, place_uuid, report_type_uuid, rating, images, description}) => {
     const user_uuidCondition = user_uuid ? 'fk_user = (SELECT id FROM dbmaster.users WHERE uuid = :user_uuid),' : '';
     const place_uuidCondition = place_uuid ? 'fk_place = (SELECT id FROM dbmaster.places WHERE uuid = :place_uuid),' : '';
-    const report_type_uuidCondition = report_type_uuid ? `DELETE FROM dbmaster.report_report_type WHERE report_uuid = :uuid; ${report_type_uuid.map(rt => `INSERT INTO dbmaster.report_report_type (report_uuid, report_type_uuid) VALUES (:uuid, '${rt}');`).join(' ')}` : '';
+    const report_type_uuidCondition = report_type_uuid !== undefined 
+        ? `DELETE FROM dbmaster.report_report_type WHERE report_uuid = :uuid;${
+            Array.isArray(report_type_uuid) && report_type_uuid.length > 0 
+                ? ' ' + report_type_uuid.map(rt => 
+                    `INSERT INTO dbmaster.report_report_type (report_uuid, report_type_uuid) VALUES (:uuid, '${rt}');`
+                  ).join(' ')
+                : ''
+          }`
+        : '';
     const ratingCondition = rating ? 'rating = :rating,' : '';
     const imagesCondition = images ? 'images = :images,' : '';
     const descriptionCondition = description ? 'description = :description,' : '';
