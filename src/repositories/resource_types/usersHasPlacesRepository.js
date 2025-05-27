@@ -126,7 +126,7 @@ const modifyUserHasPlacesQuery = ({user_uuid, place_uuid, report_type_uuid, rati
             ${ratingCondition}
             ${imagesCondition}
             ${descriptionCondition}
-            modified = :now
+            uuid = :uuid
         WHERE uuid = :uuid AND deleted IS NULL;
         
         SELECT 
