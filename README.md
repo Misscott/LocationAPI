@@ -2,6 +2,8 @@
 
 API RESTful desarrollada en Node.js que permite gestionar datos geolocalizados a través de una arquitectura organizada en controladores, modelos y repositorios. El objetivo de este proyecto es proporcionar una estructura limpia y escalable para la gestión de datos mediante peticiones HTTP.
 
+**Versión de npm:** compatible con la versión **10.9.2**
+
 ---
 
 ## 📁 Estructura del proyecto
