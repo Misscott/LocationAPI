@@ -29,6 +29,68 @@ Se utilizan middlewares y controladores definidos en las rutas para interactuar 
 
 ## 🧬 Diagrama de Arquitectura
 
+Para hacer uso de la estructura diseñada para la base de datos y manejar la inserción, actualización, obtención y el borrado de registros, necesitaremos crear una API. En este caso, hemos seguido el patrón RESTful, buscando hacer peticiones HTTP a un servidor web.
+Debido a la diferenciación entre las diferentes capas que componen la arquitectura de nuestra API RESTful, se ha decidido organizarlas en los siguientes segmentos:
+
+#### 📋 Capas de la Arquitectura
+
+**Controllers y/o Middlewares**
+Los controladores actúan como intermediarios entre las rutas HTTP y la lógica de negocio. Son responsables de:
+
+Recibir y validar las peticiones HTTP entrantes
+Procesar los parámetros y datos del cuerpo de la petición
+Invocar los métodos apropiados de los repositorios
+Formatear y enviar las respuestas al cliente
+Manejar errores y excepciones de manera centralizada
+
+Los middlewares complementan esta funcionalidad proporcionando:
+
+* Autenticación y autorización mediante JWT
+* Validación de esquemas de entrada
+* Logging de peticiones
+* Manejo de CORS y headers de seguridad
+
+**Models**
+Los modelos definen la estructura y reglas de negocio de los datos. En nuestra arquitectura:
+
+* Representan las entidades principales del sistema (ubicaciones, usuarios, etc.)
+* Definen los esquemas de validación de datos
+* Establecen las relaciones entre diferentes entidades
+* Proporcionan métodos para la transformación y serialización de datos
+
+**Repositories**
+Los repositorios encapsulan toda la lógica de acceso a datos, actuando como una capa de abstracción entre los modelos y la base de datos:
+
+* Implementan operaciones CRUD (Create, Read, Update, Delete)
+* Manejan consultas complejas y joins entre tablas
+* Gestionan transacciones y rollbacks
+* Proporcionan métodos específicos del dominio (búsquedas geoespaciales, filtros, etc.)
+* Abstraen los detalles específicos del motor de base de datos (MySQL)
+
+#### 🔄 Flujo de Funcionamiento
+
+Sabiendo esto, podemos afirmar que los middlewares y controladores serán usados en las rutas de nuestro objeto Router, conformando los métodos a ejecutar al realizar una petición HTTP a nuestro servidor Node.js. Este Router, a su vez, se instalará en la app de Express, siendo este nuestro nivel de aplicación.
+El flujo típico de una petición sigue este patrón:
+
+1. Cliente HTTP → Realiza petición (GET, POST, PUT, DELETE)
+2. Express Router → Enruta la petición al controlador apropiado
+3. Middleware → Valida autenticación, permisos y formato de datos
+4. Controller → Procesa la petición y coordina la respuesta
+5. Repository → Ejecuta operaciones en la base de datos
+6. Model → Valida y estructura los datos
+7. Database → Almacena/recupera información
+8. Response → Retorna datos formateados al cliente
+
+#### 🎯 Ventajas de esta Arquitectura
+
+* Separación de responsabilidades: Cada capa tiene un propósito específico y bien definido
+* Mantenibilidad: Los cambios en una capa no afectan directamente a las otras
+* Escalabilidad: Fácil agregar nuevas funcionalidades sin romper el código existente
+* Testabilidad: Cada componente puede ser probado de forma aislada
+* Reutilización: Los repositorios y modelos pueden ser utilizados por múltiples controladores
+
+A continuación se presenta un diagrama UML con el esqueleto general de cómo funcionarán estos segmentos en nuestra aplicación backend.
+
 ![Diagrama UML](./res/backend.svg)
 
 ---
