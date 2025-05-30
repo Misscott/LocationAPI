@@ -32,7 +32,7 @@ const insertUserHasPlacesModel = ({conn, ...params}) => {
 const modifyUserHasPlacesModel = ({conn, ...params}) => {
     const now = dayjs.utc().format('YYYY-MM-DD HH:mm:ss')
     return mysql
-        .execute(modifyUserHasPlacesQuery({...params, mow}), conn, {...params, now})
+        .execute(modifyUserHasPlacesQuery({...params, now}), conn, {...params, now})
         .then(queryResult => {
             const deletedItem = queryResult[1].find(item => item.deleted !== null);
    
