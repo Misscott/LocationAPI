@@ -1,3 +1,197 @@
+# 🌍 LocationAPI
+
+API RESTful desarrollada en Node.js que permite gestionar datos geolocalizados a través de una arquitectura organizada en controladores, modelos y repositorios. El objetivo de este proyecto es proporcionar una estructura limpia y escalable para la gestión de datos mediante peticiones HTTP.
+
+---
+
+## 📁 Estructura del proyecto
+
+La arquitectura del proyecto sigue el patrón RESTful con una separación clara de responsabilidades. Cada capa está definida de la siguiente manera:
+
+```
+├── src/
+│   ├── controllers/     # Controladores y middlewares
+│   ├── models/          # Lógica de acceso a datos
+│   ├── repositories/    # Queries
+│   ├── routes/          # Definición de rutas y uso del Router de Express
+│   ├── config/          # Archivos de configuración (development y production, en este caso)
+│   └── adapters/        # Adaptadores externos, en este caso el de mysql
+├── dump/                # Volcado SQL para replicar base de datos local
+├── out/                 # Archivos de salida o documentación generada
+├── .env                 # Variables de entorno
+├── package.json         # Dependencias y scripts
+└── README.md            # Documentación del proyecto
+```
+
+Se utilizan middlewares y controladores definidos en las rutas para interactuar con los modelos a través de los repositorios, usando el Router de Express como núcleo de la aplicación.
+
+---
+
+## 🧬 Diagrama de Arquitectura
+
+![Diagrama UML](./res/backend.svg)
+
+---
+
+## ⚙️ Proceso de instalación y despliegue
+
+### 1️⃣ Clonar el repositorio
+
+Ejecuta el siguiente comando en tu terminal:
+
+```bash
+git clone https://github.com/Misscott/LocationAPI
+```
+
+📌 Luego accede a la carpeta del repositorio descargada en el ordenador para instalar las dependencias de las que hablaremos al final del documento. 
+
+### 2️⃣ Crear la base de datos
+
+Abre MySQL Workbench y crea una nueva conexión o añade un nuevo esquema a una conexión existente llamado `dbmaster`.
+
+⚠️ **Es obligatorio que el nombre del esquema sea exactamente `dbmaster` para que el dump funcione correctamente.**
+
+Para replicar la base de datos en local, importa el archivo `dump/acLocDump20250528.sql` del directorio `dump/` del repositorio. También se adjuntará una copia de este archivo dump en el USB del proyecto.
+
+### 3️⃣ Instalar dependencias
+
+Este proyecto utiliza varias dependencias de Node.js necesarias para su correcto funcionamiento, incluyendo Express, MySQL, dotenv y otras librerías de utilidad para la gestión de rutas, controladores y seguridad.
+
+Para instalarlas, asegúrate de haber clonado el repositorio y luego ejecuta el siguiente comando en la raíz del proyecto:
+
+```bash
+npm install
+```
+
+Esto instalará automáticamente todos los paquetes listados en el archivo `package.json`. En teoría el archivo `package-lock.json` deberia generarse automáticamente con las versiones de las dependencias junto con la carpeta `node_modules`, pero para asegurarnos de que estos archivos estén completamente actualizados, será recomendable copiar y pegar el contenido de estos archivos que se dejará disponible al final de este README.md. 
+
+
+### 4️⃣ Ejecutar en modo local (Desarrollo)
+
+Una vez instalada la base de datos y configurados los archivos, puedes iniciar el proyecto con:
+
+```bash
+npm run start
+```
+
+Asegúrate de tener configurado correctamente el archivo `.env` y los archivos de configuración en `src/config`.
+
+### 5️⃣ Configuración necesaria
+
+#### 📄 Archivo `.env`
+
+Este archivo define las variables de entorno necesarias. Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+
+```env
+JWT_SECRET=e774452f54e819214b2cff910284698b855d200c2d22c98954ebc5aeb366d5f21082b0710d230e9a5f71b22bf587ae4bcd9fb045a879919837625f24641af01e
+JWT_TIME=54000
+NODE_ENV=development
+```
+
+#### 📁 Archivo `src/config/development.js`
+
+Este archivo se usará para ejecutar el proyecto en entorno de desarrollo. Asegúrate de crearlo así:
+
+```javascript
+export default {
+	environment: 'development',
+	port: 3000,
+	bodyLimit: '300kb',
+	db: {
+		host: 'localhost',
+		user: '~',
+		password: '~',
+		timezone: '+00:00',
+		decimalNumbers: true
+	},
+	saltRounds: 10,
+	uploadDir: 'uploads'
+}
+```
+⚠️ **Es importante sustituir el usuario y contraseña por los establecidos por el usuario en la conexión local. El puerto/port puede cambiarse por uno que no esté en uso por el usuario ya que será donde corra el servidor Node.js en la máquina local.**
+
+#### 📁 Archivo `src/config/production.js`
+
+Este archivo será utilizado para desplegar en producción. Puedes dejarlo con la misma estructura:
+
+```javascript
+export default {
+	environment: 'production',
+	port: 3000,
+	bodyLimit: '300kb',
+	db: {
+		host: 'ls-f85b70f391f2c9e6cf335dafef04161a8a719f25.cf88wacmc99x.eu-west-3.rds.amazonaws.com',
+		user: 'dbmasteruser',
+		password: 'NZU~jdR28NWC25qw5o81m|ki#Ib?a{Nk',
+		timezone: '+00:00',
+		decimalNumbers: true
+	},
+	saltRounds: 10,
+	uploadDir: 'uploads'
+}
+```
+⚠️ **Este archivo se presenta aquí por razones informativas y por si el usuario quisiese conectarse a la base de datos en la nube, pero no es necesario que se copie y pegue. El puerto/port puede cambiarse por uno que no esté en uso por el usuario ya que será donde corra el servidor Node.js en la máquina local.**
+
+### 6️⃣ Verificación del despliegue local
+
+Si todo está correctamente configurado, deberías ver en la consola el siguiente mensaje al ejecutar el proyecto:
+
+```
+Server listening on port 3000
+```
+
+
+## 📝 Notas
+
+📌 **Despliegue alternativo en la nube**
+
+Si, por alguna razón cambiasemos el servidor de despliegue de la base de datos y/o backend en la nube, solo deberias pasarle los datos de las variables de entorno a tu proveedor del servicio, junto con los archivos y, recomendablemente, si el proyecto fuese más grande, duplicar la base de datos actual en este nuevo sitio. Sin embargo, esto depende totalmente de la plataforma y es mejor leer la documentación específica de la misma.
+
+`package.json`
+```javascript
+{
+  "name": "api_gate_main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development node ./src/index.js",
+    "test2": "cross-env NODE_ENV=development node test/002_device_controller_get_test",
+    "test3": "cross-env NODE_ENV=development node test/003_device_controller_post_test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "api_gate_main": "file:",
+    "bcrypt": "^5.1.1",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.2",
+    "mysql2": "3.12.0",
+    "rest": "file:",
+    "supertest": "^7.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "3.14.0",
+    "cross-env": "^7.0.3",
+    "docdash": "^2.0.2",
+    "esbuild": "^0.24.2",
+    "eslint": "9.18.0",
+    "jsdoc": "^4.0.4",
+    "jsdoc-route-plugin": "^0.1.0",
+    "nodemon": "3.1.9"
+  }
+}
+```
+
+`package-lock.json`
+```javascript
 {
   "name": "api_gate_main",
   "version": "1.0.0",
@@ -6849,3 +7043,4 @@
     }
   }
 }
+```
