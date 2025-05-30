@@ -34,11 +34,11 @@ const modifyUserHasPlacesModel = ({conn, ...params}) => {
     return mysql
         .execute(modifyUserHasPlacesQuery({...params, now}), conn, {...params, now})
         .then(queryResult => {
-            const deletedItem = queryResult[1].find(item => item.deleted !== null);
+            /*const deletedItem = queryResult[1].find(item => item.deleted !== null);
    
             if (deletedItem) {
                 throw error404()
-            }
+            }*/
             return queryResult[2].map(({id, created, deleted, createdBy, deletedBy, ...resultFiltered}) => resultFiltered)
         })
 }
