@@ -856,7 +856,7 @@ export default(config) => {
      * @returns {ErrorResponse} 403 - Forbidden
     */
     routes.delete(
-        '/roles/:role_uuid/permissions/permission_uuid',
+        '/roles/:role_uuid/permissions/:permission_uuid',
         (req, res, next) => authenticateToken(req, res, next, config),
         (req, res, next) => authorizePermission('/roles/:role_uuid/permissions/permission_uuid')(req, res, next, config),
         [
@@ -1655,7 +1655,7 @@ export default(config) => {
      * @returns {ErrorResponse} 500 - Internal server error
      * @returns {ErrorResponse} 403 - Forbidden
     */
-    routes.post('favorites/places/:place_uuid/restore', 
+    routes.post('/favorites/places/:place_uuid/restore', 
         (req, res, next) => authenticateToken(req, res, next, config),
         [
             uuid('place_uuid')
